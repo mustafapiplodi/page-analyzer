@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Users, Plus, Trash2, TrendingUp, TrendingDown, Minus, Loader2 } from "lucide-react"
+import { Users, Plus, Trash2, TrendingUp, TrendingDown, Minus, Loader2, ChevronDown, ChevronUp } from "lucide-react"
 
 export default function CompetitorComparison({ currentSite, onAnalyze }) {
   const [competitors, setCompetitors] = useState([]);
@@ -30,20 +30,48 @@ export default function CompetitorComparison({ currentSite, onAnalyze }) {
     setCompetitors(updatedCompetitors);
 
     try {
-      // Use the same strategy as the current site test
-      await onAnalyze(competitors[index].url, currentSite.strategy || 'mobile');
+      // Fetch data directly without updating main page
+      const apiUrl = import.meta.env.DEV
+        ? 'https://page-speed-analyzer-llgi3t1iu-mustafapiplodis-projects.vercel.app/api/pagespeed'
+        : '/api/pagespeed';
 
-      // Note: Since onAnalyze updates the main results, we'll just mark as tested
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: competitors[index].url,
+          strategy: currentSite.strategy || 'mobile'
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to analyze competitor');
+      }
+
+      // Store the results in the competitor object
       const finalCompetitors = [...competitors];
       finalCompetitors[index].loading = false;
       finalCompetitors[index].tested = true;
+      finalCompetitors[index].data = data;
+      finalCompetitors[index].expanded = true; // Auto-expand after test
       setCompetitors(finalCompetitors);
     } catch (error) {
-      // Reset loading state on error
+      // Reset loading state on error and store error
       const finalCompetitors = [...competitors];
       finalCompetitors[index].loading = false;
+      finalCompetitors[index].error = error.message;
       setCompetitors(finalCompetitors);
     }
+  };
+
+  const toggleExpanded = (index) => {
+    const updatedCompetitors = [...competitors];
+    updatedCompetitors[index].expanded = !updatedCompetitors[index].expanded;
+    setCompetitors(updatedCompetitors);
   };
 
   return (
@@ -114,44 +142,131 @@ export default function CompetitorComparison({ currentSite, onAnalyze }) {
 
             {/* Competitors */}
             {competitors.map((comp, index) => (
-              <div key={index} className="p-4 border rounded-lg bg-muted/30">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline">Competitor {index + 1}</Badge>
-                      <span className="text-sm text-muted-foreground">{comp.url}</span>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Click "Test Competitor" to analyze this URL
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => testCompetitor(index)}
-                      disabled={comp.loading}
-                    >
-                      {comp.loading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                          Testing...
-                        </>
-                      ) : comp.tested ? (
-                        'Test Again'
-                      ) : (
-                        'Test Competitor'
+              <div key={index} className="border rounded-lg bg-muted/30">
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="outline">Competitor {index + 1}</Badge>
+                        <span className="text-sm font-medium">{comp.url}</span>
+                      </div>
+                      {!comp.tested && !comp.loading && (
+                        <div className="text-xs text-muted-foreground">
+                          Click "Test Competitor" to analyze
+                        </div>
                       )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => removeCompetitor(index)}
-                      disabled={comp.loading}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                      {comp.error && (
+                        <div className="text-xs text-destructive mt-1">
+                          Error: {comp.error}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => testCompetitor(index)}
+                        disabled={comp.loading}
+                      >
+                        {comp.loading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                            Testing...
+                          </>
+                        ) : comp.tested ? (
+                          'Retest'
+                        ) : (
+                          'Test Competitor'
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeCompetitor(index)}
+                        disabled={comp.loading}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </div>
+
+                  {/* Show results inline if tested */}
+                  {comp.tested && comp.data && (
+                    <div className="mt-3 pt-3 border-t">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold" style={{
+                              color: comp.data.performanceScore >= 90 ? '#0CCE6B' :
+                                     comp.data.performanceScore >= 50 ? '#FFA400' : '#FF4E42'
+                            }}>
+                              {comp.data.performanceScore}
+                            </div>
+                            <div className="text-xs text-muted-foreground">Performance</div>
+                          </div>
+                          {currentSite.performanceScore && (
+                            <div className="flex items-center gap-1">
+                              {comp.data.performanceScore > currentSite.performanceScore ? (
+                                <TrendingUp className="h-4 w-4 text-good" />
+                              ) : comp.data.performanceScore < currentSite.performanceScore ? (
+                                <TrendingDown className="h-4 w-4 text-destructive" />
+                              ) : (
+                                <Minus className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <span className="text-xs text-muted-foreground">
+                                {Math.abs(comp.data.performanceScore - currentSite.performanceScore)} pts
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => toggleExpanded(index)}
+                        >
+                          {comp.expanded ? (
+                            <>
+                              <ChevronUp className="h-4 w-4 mr-1" />
+                              Less
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="h-4 w-4 mr-1" />
+                              Details
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      {/* Expandable details */}
+                      {comp.expanded && (
+                        <div className="mt-3 space-y-2 text-sm">
+                          <div className="grid grid-cols-3 gap-2">
+                            <div className="bg-background p-2 rounded">
+                              <div className="text-xs text-muted-foreground">LCP</div>
+                              <div className="font-semibold">{comp.data.metrics?.lcp?.displayValue || 'N/A'}</div>
+                            </div>
+                            <div className="bg-background p-2 rounded">
+                              <div className="text-xs text-muted-foreground">CLS</div>
+                              <div className="font-semibold">{comp.data.metrics?.cls?.displayValue || 'N/A'}</div>
+                            </div>
+                            <div className="bg-background p-2 rounded">
+                              <div className="text-xs text-muted-foreground">TBT</div>
+                              <div className="font-semibold">{comp.data.metrics?.tbt?.displayValue || 'N/A'}</div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 text-xs">
+                            <Badge variant="outline">
+                              Accessibility: {comp.data.accessibilityScore}
+                            </Badge>
+                            <Badge variant="outline">
+                              Best Practices: {comp.data.bestPracticesScore}
+                            </Badge>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
