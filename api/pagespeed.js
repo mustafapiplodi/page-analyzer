@@ -211,6 +211,9 @@ function extractOpportunities(audits, detectedStack) {
   for (const auditId of opportunityAudits) {
     const audit = audits[auditId];
     if (audit && audit.details && audit.score !== null && audit.score < 1) {
+      const frameworkAdvice = getFrameworkSpecificAdvice(auditId, detectedStack);
+      const priority = calculatePriority(audit, frameworkAdvice);
+
       const opportunity = {
         id: auditId,
         title: audit.title,
@@ -221,17 +224,53 @@ function extractOpportunities(audits, detectedStack) {
           ms: audit.details.overallSavingsMs || 0,
           bytes: audit.details.overallSavingsBytes || 0
         },
+        // Add priority
+        priority: priority,
         // Add framework-specific recommendations
-        frameworkAdvice: getFrameworkSpecificAdvice(auditId, detectedStack)
+        frameworkAdvice: frameworkAdvice
       };
       opportunities.push(opportunity);
     }
   }
 
-  // Sort by time savings (descending)
-  opportunities.sort((a, b) => b.savings.ms - a.savings.ms);
+  // Sort by priority (high > medium > low), then by time savings
+  opportunities.sort((a, b) => {
+    const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+    if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
+    }
+    return b.savings.ms - a.savings.ms;
+  });
 
   return opportunities.slice(0, 10); // Return top 10
+}
+
+/**
+ * Calculate priority based on impact and effort
+ */
+function calculatePriority(audit, frameworkAdvice) {
+  const savingsMs = audit.details?.overallSavingsMs || 0;
+  const savingsBytes = audit.details?.overallSavingsBytes || 0;
+  const score = audit.score || 0;
+  const effort = frameworkAdvice?.effort || 'Medium';
+
+  // High priority: high impact + easy/medium implementation
+  if ((savingsMs > 1000 || savingsBytes > 100000) && effort !== 'Hard') {
+    return 'high';
+  }
+
+  // High priority: very low score + easy fix
+  if (score < 0.3 && effort === 'Easy') {
+    return 'high';
+  }
+
+  // Medium priority: moderate impact or medium effort with good impact
+  if (savingsMs > 500 || savingsBytes > 50000 || (score < 0.5 && effort === 'Medium')) {
+    return 'medium';
+  }
+
+  // Low priority: small savings or hard implementation
+  return 'low';
 }
 
 /**

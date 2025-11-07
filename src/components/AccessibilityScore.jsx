@@ -2,12 +2,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Eye, Zap, AlertCircle, CheckCircle2, Shield } from "lucide-react"
+import { Eye, Zap, AlertCircle, CheckCircle2, Shield, Search } from "lucide-react"
 
 export default function AccessibilityScore({
   accessibilityScore,
   performanceScore,
   bestPracticesScore,
+  seoScore,
   accessibilityIssues
 }) {
   const getScoreColor = (score) => {
@@ -23,7 +24,7 @@ export default function AccessibilityScore({
   };
 
   const getCombinedScore = () => {
-    return Math.round((performanceScore * 0.5) + (accessibilityScore * 0.3) + (bestPracticesScore * 0.2));
+    return Math.round((performanceScore * 0.4) + (accessibilityScore * 0.25) + (bestPracticesScore * 0.15) + (seoScore * 0.2));
   };
 
   const combinedScore = getCombinedScore();
@@ -53,7 +54,7 @@ export default function AccessibilityScore({
               {getScoreLabel(combinedScore)}
             </Badge>
             <p className="text-xs text-muted-foreground mt-2">
-              50% Performance • 30% Accessibility • 20% Best Practices
+              40% Performance • 25% Accessibility • 15% Best Practices • 20% SEO
             </p>
           </div>
         </div>
@@ -156,6 +157,36 @@ export default function AccessibilityScore({
                     style={{
                       width: `${bestPracticesScore}%`,
                       backgroundColor: bestPracticesScore >= 90 ? '#0CCE6B' : bestPracticesScore >= 50 ? '#FFA400' : '#FF4E42'
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* SEO Score */}
+            <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+              <div className="flex items-center gap-3">
+                <Search className="h-5 w-5" style={{
+                  color: seoScore >= 90 ? '#0CCE6B' : seoScore >= 50 ? '#FFA400' : '#FF4E42'
+                }} />
+                <div>
+                  <div className="font-semibold">SEO</div>
+                  <div className="text-xs text-muted-foreground">Search engine optimization</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <div className="text-2xl font-bold">{seoScore}</div>
+                  <Badge variant={getScoreColor(seoScore)} className="text-xs">
+                    {getScoreLabel(seoScore)}
+                  </Badge>
+                </div>
+                <div className="w-24 bg-muted rounded-full h-2">
+                  <div
+                    className="h-2 rounded-full transition-all"
+                    style={{
+                      width: `${seoScore}%`,
+                      backgroundColor: seoScore >= 90 ? '#0CCE6B' : seoScore >= 50 ? '#FFA400' : '#FF4E42'
                     }}
                   />
                 </div>

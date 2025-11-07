@@ -4,6 +4,8 @@ import Opportunities from './Opportunities';
 import AccessibilityScore from './AccessibilityScore';
 import SmartRecommendations from './SmartRecommendations';
 import CompetitorComparison from './CompetitorComparison';
+import Screenshot from './Screenshot';
+import QuickWins from './QuickWins';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,6 +49,7 @@ export default function Results({ data, onAnalyze }) {
           accessibilityScore={data.accessibilityScore}
           performanceScore={data.performanceScore}
           bestPracticesScore={data.bestPracticesScore}
+          seoScore={data.seoScore}
           accessibilityIssues={data.accessibilityIssues || []}
         />
       ) : (
@@ -54,6 +57,14 @@ export default function Results({ data, onAnalyze }) {
       )}
 
       <CoreWebVitals metrics={data.metrics} />
+
+      {/* Page Screenshot */}
+      <Screenshot screenshot={data.screenshot} />
+
+      {/* Quick Wins Section */}
+      {data.opportunities && data.opportunities.length > 0 && (
+        <QuickWins opportunities={data.opportunities} />
+      )}
 
       {/* Smart Recommendations with Framework Detection */}
       {data.detectedStack && data.opportunities && data.opportunities.length > 0 ? (

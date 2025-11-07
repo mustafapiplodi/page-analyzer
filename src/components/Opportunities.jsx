@@ -7,23 +7,15 @@ export default function Opportunities({ opportunities }) {
     return null;
   }
 
-  const getPriorityVariant = (savings) => {
-    if (savings.ms > 500 || savings.bytes > 100000) {
-      return 'poor';
-    }
-    if (savings.ms > 200 || savings.bytes > 50000) {
-      return 'warning';
-    }
+  const getPriorityVariant = (priority) => {
+    if (priority === 'high') return 'poor';
+    if (priority === 'medium') return 'warning';
     return 'good';
   };
 
-  const getPriorityLabel = (savings) => {
-    if (savings.ms > 500 || savings.bytes > 100000) {
-      return 'High Priority';
-    }
-    if (savings.ms > 200 || savings.bytes > 50000) {
-      return 'Medium Priority';
-    }
+  const getPriorityLabel = (priority) => {
+    if (priority === 'high') return 'High Priority';
+    if (priority === 'medium') return 'Medium Priority';
     return 'Low Priority';
   };
 
@@ -54,8 +46,8 @@ export default function Opportunities({ opportunities }) {
       <CardContent>
         <div className="space-y-4">
           {opportunities.map((opportunity, index) => {
-            const priorityVariant = getPriorityVariant(opportunity.savings);
-            const priorityLabel = getPriorityLabel(opportunity.savings);
+            const priorityVariant = getPriorityVariant(opportunity.priority || 'medium');
+            const priorityLabel = getPriorityLabel(opportunity.priority || 'medium');
 
             return (
               <Card key={opportunity.id} className="border-2 hover:shadow-md transition-shadow">
