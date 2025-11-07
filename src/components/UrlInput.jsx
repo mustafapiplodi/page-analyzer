@@ -121,17 +121,6 @@ export default function UrlInput({ onAnalyze, loading }) {
           </form>
         </CardContent>
       </Card>
-
-      {loading && (
-        <Card className="max-w-2xl mx-auto mt-6">
-          <CardContent className="flex flex-col items-center py-8">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-            <p className="text-lg font-medium">Analyzing page performance...</p>
-            <p className="text-sm text-muted-foreground mt-2">Testing mobile performance (10-30 seconds)</p>
-            <p className="text-xs text-muted-foreground mt-1">Desktop analysis will run automatically after mobile completes</p>
-          </CardContent>
-        </Card>
-      )}
       </div>
     </div>
   );
