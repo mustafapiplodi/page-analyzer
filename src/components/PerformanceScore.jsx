@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Chart, DoughnutController, ArcElement, Tooltip, Legend } from 'chart.js';
-import './PerformanceScore.css';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Zap, TrendingUp, TrendingDown } from 'lucide-react';
 
 // Register Chart.js components
 Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
@@ -21,6 +23,12 @@ export default function PerformanceScore({ score }) {
     return 'Slow';
   };
 
+  const getScoreVariant = (score) => {
+    if (score >= 90) return 'good';
+    if (score >= 50) return 'warning';
+    return 'poor';
+  };
+
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -37,7 +45,7 @@ export default function PerformanceScore({ score }) {
       data: {
         datasets: [{
           data: [score, 100 - score],
-          backgroundColor: [scoreColor, '#E0E0E0'],
+          backgroundColor: [scoreColor, 'hsl(var(--muted))'],
           borderWidth: 0,
           circumference: 180,
           rotation: 270
@@ -66,7 +74,7 @@ export default function PerformanceScore({ score }) {
           ctx.save();
 
           // Draw score
-          ctx.font = 'bold 48px Arial';
+          ctx.font = 'bold 48px system-ui, -apple-system, sans-serif';
           ctx.fillStyle = scoreColor;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
@@ -85,30 +93,52 @@ export default function PerformanceScore({ score }) {
   }, [score]);
 
   return (
-    <div className="performance-score-container">
-      <h2 className="score-title">Performance Score</h2>
-      <div className="gauge-container">
-        <canvas ref={canvasRef}></canvas>
-      </div>
-      <div className="score-info">
-        <span className="score-label" style={{ color: getScoreColor(score) }}>
-          {getScoreLabel(score)}
-        </span>
-      </div>
-      <div className="score-legend">
-        <div className="legend-item">
-          <span className="legend-color" style={{ backgroundColor: '#0CCE6B' }}></span>
-          <span>90-100: Fast</span>
+    <Card className="mt-6">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-primary" />
+            <CardTitle>Performance Score</CardTitle>
+          </div>
+          <Badge variant={getScoreVariant(score)}>
+            {getScoreLabel(score)}
+          </Badge>
         </div>
-        <div className="legend-item">
-          <span className="legend-color" style={{ backgroundColor: '#FFA400' }}></span>
-          <span>50-89: Needs Improvement</span>
+        <CardDescription>
+          Overall performance based on Google's PageSpeed Insights
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col items-center">
+          <div className="w-full max-w-xs h-48 mb-6">
+            <canvas ref={canvasRef}></canvas>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 w-full">
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-good/10 border border-good/20">
+              <div className="h-3 w-3 rounded-full bg-good mt-1 flex-shrink-0"></div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-medium text-good">Fast</div>
+                <div className="text-xs text-muted-foreground">90-100</div>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20">
+              <div className="h-3 w-3 rounded-full bg-warning mt-1 flex-shrink-0"></div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-medium text-warning">Moderate</div>
+                <div className="text-xs text-muted-foreground">50-89</div>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-poor/10 border border-poor/20">
+              <div className="h-3 w-3 rounded-full bg-poor mt-1 flex-shrink-0"></div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-medium text-poor">Slow</div>
+                <div className="text-xs text-muted-foreground">0-49</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="legend-item">
-          <span className="legend-color" style={{ backgroundColor: '#FF4E42' }}></span>
-          <span>0-49: Slow</span>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

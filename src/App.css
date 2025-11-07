@@ -1,36 +1,7 @@
 .app {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 2rem 0;
-}
-
-.error-container {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  background: #fff3f3;
-  border-left: 4px solid #FF4E42;
-  border-radius: 8px;
-  display: flex;
-  gap: 1rem;
-  align-items: start;
-}
-
-.error-icon {
-  font-size: 2rem;
-  flex-shrink: 0;
-}
-
-.error-container h3 {
-  color: #d32f2f;
-  margin: 0 0 0.5rem 0;
-  font-size: 1.25rem;
-}
-
-.error-container p {
-  color: #c62828;
-  margin: 0;
-  line-height: 1.6;
+  padding: 2rem 0 1rem;
 }
 
 .app-footer {
@@ -50,28 +21,26 @@
   color: white;
   text-decoration: underline;
   font-weight: 500;
+  transition: opacity 0.2s;
 }
 
 .app-footer a:hover {
-  text-decoration: none;
+  opacity: 0.8;
 }
 
 .footer-note {
-  opacity: 0.8;
+  opacity: 0.85;
   font-size: 0.8125rem !important;
 }
 
 /* Mobile responsive */
 @media (max-width: 768px) {
   .app {
-    padding: 1rem 0;
-  }
-
-  .error-container {
-    margin: 1rem;
+    padding: 1rem 0 0.5rem;
   }
 
   .app-footer {
     margin-top: 3rem;
+    padding: 1.5rem 1rem;
   }
 }

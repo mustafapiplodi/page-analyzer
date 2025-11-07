@@ -8,30 +8,38 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Info } from 'lucide-react';
-import './Results.css';
 
 export default function Results({ data }) {
   if (!data) return null;
 
   return (
-    <div className="results-container">
-      <div className="results-header">
-        <h2>Analysis Results</h2>
-        <div className="analyzed-url">
-          <span className="url-label">Analyzed URL:</span>
-          <a href={data.url} target="_blank" rel="noopener noreferrer" className="url-link">
-            {data.url}
-          </a>
-        </div>
-        <div className="test-info">
-          <Badge variant="outline">
-            {data.strategy === 'mobile' ? '📱 Mobile' : '💻 Desktop'}
-          </Badge>
-          <span className="test-time">
-            {new Date(data.timestamp).toLocaleString()}
-          </span>
-        </div>
-      </div>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <Card className="mt-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+        <CardContent className="pt-6">
+          <h2 className="text-2xl font-bold mb-4">Analysis Results</h2>
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Analyzed URL:</span>
+              <a
+                href={data.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-primary hover:underline break-all"
+              >
+                {data.url}
+              </a>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge variant="outline" className="bg-background">
+                {data.strategy === 'mobile' ? '📱 Mobile' : '💻 Desktop'}
+              </Badge>
+              <span className="text-sm text-muted-foreground">
+                {new Date(data.timestamp).toLocaleString()}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Combined Accessibility + Performance Score */}
       {data.accessibilityScore !== undefined && data.bestPracticesScore !== undefined ? (
@@ -83,10 +91,11 @@ export default function Results({ data }) {
         </Card>
       )}
 
-      <div className="results-footer">
+      <div className="flex justify-center mt-8 mb-6">
         <Button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           size="lg"
+          className="min-w-[200px]"
         >
           Test Another URL
         </Button>

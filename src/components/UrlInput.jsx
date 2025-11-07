@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertCircle, Loader2, Smartphone, Monitor } from 'lucide-react';
-import './UrlInput.css';
 
 export default function UrlInput({ onAnalyze, loading }) {
   const [url, setUrl] = useState('');
@@ -39,10 +38,12 @@ export default function UrlInput({ onAnalyze, loading }) {
   };
 
   return (
-    <div className="url-input-container">
-      <div className="hero-section">
-        <h1>Website Speed Test</h1>
-        <p className="subtitle">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 drop-shadow-lg">
+          Website Speed Test
+        </h1>
+        <p className="text-lg text-white/90 max-w-2xl mx-auto">
           Analyze your website performance and get actionable insights based on Google's Core Web Vitals
         </p>
       </div>
