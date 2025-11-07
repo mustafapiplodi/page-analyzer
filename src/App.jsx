@@ -68,7 +68,7 @@ function App() {
           </div>
         )}
 
-        {results && <Results data={results} />}
+        {results && <Results data={results} onAnalyze={handleAnalyze} />}
 
         {/* Show About section when no results */}
         {!results && !loading && <AboutSection />}

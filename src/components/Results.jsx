@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Info } from 'lucide-react';
 
-export default function Results({ data }) {
+export default function Results({ data, onAnalyze }) {
   if (!data) return null;
 
   return (
@@ -72,8 +72,10 @@ export default function Results({ data }) {
         currentSite={{
           url: data.url,
           performanceScore: data.performanceScore,
-          metrics: data.metrics
+          metrics: data.metrics,
+          strategy: data.strategy
         }}
+        onAnalyze={onAnalyze}
       />
 
       {data.fieldData && (

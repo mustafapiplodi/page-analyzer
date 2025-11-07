@@ -2,9 +2,9 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Users, Plus, Trash2, TrendingUp, TrendingDown, Minus } from "lucide-react"
+import { Users, Plus, Trash2, TrendingUp, TrendingDown, Minus, Loader2 } from "lucide-react"
 
-export default function CompetitorComparison({ currentSite }) {
+export default function CompetitorComparison({ currentSite, onAnalyze }) {
   const [competitors, setCompetitors] = useState([]);
   const [newCompetitorUrl, setNewCompetitorUrl] = useState("");
 
@@ -21,6 +21,29 @@ export default function CompetitorComparison({ currentSite }) {
 
   const removeCompetitor = (index) => {
     setCompetitors(competitors.filter((_, i) => i !== index));
+  };
+
+  const testCompetitor = async (index) => {
+    // Set loading state for this competitor
+    const updatedCompetitors = [...competitors];
+    updatedCompetitors[index].loading = true;
+    setCompetitors(updatedCompetitors);
+
+    try {
+      // Use the same strategy as the current site test
+      await onAnalyze(competitors[index].url, currentSite.strategy || 'mobile');
+
+      // Note: Since onAnalyze updates the main results, we'll just mark as tested
+      const finalCompetitors = [...competitors];
+      finalCompetitors[index].loading = false;
+      finalCompetitors[index].tested = true;
+      setCompetitors(finalCompetitors);
+    } catch (error) {
+      // Reset loading state on error
+      const finalCompetitors = [...competitors];
+      finalCompetitors[index].loading = false;
+      setCompetitors(finalCompetitors);
+    }
   };
 
   return (
@@ -103,13 +126,28 @@ export default function CompetitorComparison({ currentSite }) {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button size="sm" variant="outline">
-                      Test Competitor
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => testCompetitor(index)}
+                      disabled={comp.loading}
+                    >
+                      {comp.loading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          Testing...
+                        </>
+                      ) : comp.tested ? (
+                        'Test Again'
+                      ) : (
+                        'Test Competitor'
+                      )}
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => removeCompetitor(index)}
+                      disabled={comp.loading}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
