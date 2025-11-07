@@ -161,6 +161,9 @@ export default async function handler(req, res) {
       // Accessibility issues
       accessibilityIssues: extractAccessibilityIssues(audits),
 
+      // Resource breakdown
+      resourceBreakdown: extractResourceBreakdown(audits),
+
       // Screenshot
       screenshot: lighthouseResult.audits['final-screenshot']?.details?.data || null
     };
@@ -456,4 +459,64 @@ function extractAccessibilityIssues(audits) {
   }
 
   return issues;
+}
+
+/**
+ * Extract resource breakdown by type
+ */
+function extractResourceBreakdown(audits) {
+  const networkRequests = audits['network-requests']?.details?.items || [];
+
+  const breakdown = {
+    javascript: { size: 0, count: 0, resources: [] },
+    css: { size: 0, count: 0, resources: [] },
+    images: { size: 0, count: 0, resources: [] },
+    fonts: { size: 0, count: 0, resources: [] },
+    document: { size: 0, count: 0, resources: [] },
+    other: { size: 0, count: 0, resources: [] }
+  };
+
+  let totalSize = 0;
+
+  for (const item of networkRequests) {
+    const size = item.transferSize || 0;
+    const resourceType = item.resourceType?.toLowerCase() || 'other';
+    totalSize += size;
+
+    let category = 'other';
+
+    if (resourceType === 'script') {
+      category = 'javascript';
+    } else if (resourceType === 'stylesheet') {
+      category = 'css';
+    } else if (resourceType === 'image') {
+      category = 'images';
+    } else if (resourceType === 'font') {
+      category = 'fonts';
+    } else if (resourceType === 'document') {
+      category = 'document';
+    }
+
+    breakdown[category].size += size;
+    breakdown[category].count += 1;
+
+    // Store top 5 largest resources per category
+    if (breakdown[category].resources.length < 5) {
+      breakdown[category].resources.push({
+        url: item.url,
+        size: size
+      });
+    }
+  }
+
+  // Calculate percentages
+  Object.keys(breakdown).forEach(category => {
+    breakdown[category].percentage = totalSize > 0
+      ? Math.round((breakdown[category].size / totalSize) * 100)
+      : 0;
+  });
+
+  breakdown.total = totalSize;
+
+  return breakdown;
 }

@@ -6,6 +6,7 @@ import SmartRecommendations from './SmartRecommendations';
 import CompetitorComparison from './CompetitorComparison';
 import Screenshot from './Screenshot';
 import QuickWins from './QuickWins';
+import ResourceBreakdown from './ResourceBreakdown';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -65,6 +66,9 @@ export default function Results({ data, onAnalyze }) {
       {data.opportunities && data.opportunities.length > 0 && (
         <QuickWins opportunities={data.opportunities} />
       )}
+
+      {/* Resource Breakdown */}
+      <ResourceBreakdown breakdown={data.resourceBreakdown} />
 
       {/* Smart Recommendations with Framework Detection */}
       {data.detectedStack && data.opportunities && data.opportunities.length > 0 ? (

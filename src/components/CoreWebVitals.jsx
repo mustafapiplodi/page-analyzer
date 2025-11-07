@@ -1,7 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Gauge, Layout, Paintbrush, Timer, Rocket, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Gauge, Layout, Paintbrush, Timer, Rocket, Info, HelpCircle } from 'lucide-react';
 
 export default function CoreWebVitals({ metrics }) {
   const getMetricColor = (metricName, value) => {
@@ -76,61 +77,77 @@ export default function CoreWebVitals({ metrics }) {
     lcp: {
       name: 'Largest Contentful Paint',
       description: 'Measures loading performance. Good LCP is ≤2.5s',
+      tooltip: 'LCP marks the time when the largest image or text block visible in the viewport is rendered. It\'s one of the three Core Web Vitals and critical for SEO.',
       icon: Gauge
     },
     cls: {
       name: 'Cumulative Layout Shift',
       description: 'Measures visual stability. Good CLS is ≤0.1',
+      tooltip: 'CLS measures unexpected layout shifts during page load. A good score means your page doesn\'t jump around while loading, improving user experience.',
       icon: Layout
     },
     fcp: {
       name: 'First Contentful Paint',
       description: 'Time until first content appears. Good FCP is ≤1.8s',
+      tooltip: 'FCP measures when the first text, image, or canvas element appears. It\'s the first signal to users that your page is loading.',
       icon: Paintbrush
     },
     tbt: {
       name: 'Total Blocking Time',
       description: 'Measures interactivity. Good TBT is ≤200ms (proxy for INP)',
+      tooltip: 'TBT measures how long the main thread was blocked, preventing user interaction. It\'s used in lab testing as a proxy for INP (Interaction to Next Paint).',
       icon: Timer
     },
     speedIndex: {
       name: 'Speed Index',
       description: 'How quickly content is visually displayed. Good SI is ≤3.4s',
+      tooltip: 'Speed Index shows how quickly the contents of a page are visibly populated. Lower values are better.',
       icon: Rocket
     }
   };
 
   return (
-    <Card className="mt-6">
-      <CardHeader>
-        <CardTitle>Core Web Vitals & Performance Metrics</CardTitle>
-        <CardDescription>Lab data from Lighthouse testing</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {Object.entries(metrics).map(([key, metric]) => {
-            const info = metricInfo[key];
-            if (!info) return null;
+    <TooltipProvider>
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Core Web Vitals & Performance Metrics</CardTitle>
+          <CardDescription>Lab data from Lighthouse testing</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Object.entries(metrics).map(([key, metric]) => {
+              const info = metricInfo[key];
+              if (!info) return null;
 
-            const Icon = info.icon;
-            const color = getMetricColor(key, metric.value);
-            const status = getMetricStatus(key, metric.value);
-            const variant = getMetricVariant(key, metric.value);
-            const progressColor = getProgressColor(key, metric.value);
+              const Icon = info.icon;
+              const color = getMetricColor(key, metric.value);
+              const status = getMetricStatus(key, metric.value);
+              const variant = getMetricVariant(key, metric.value);
+              const progressColor = getProgressColor(key, metric.value);
 
-            return (
-              <Card key={key} className="border-2 hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <Icon className="h-5 w-5 text-muted-foreground" />
-                    <Badge variant={variant} className="text-xs">
-                      {status}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-sm font-medium leading-tight mt-2">
-                    {info.name}
-                  </CardTitle>
-                </CardHeader>
+              return (
+                <Card key={key} className="border-2 hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <Icon className="h-5 w-5 text-muted-foreground" />
+                      <Badge variant={variant} className="text-xs">
+                        {status}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <CardTitle className="text-sm font-medium leading-tight">
+                        {info.name}
+                      </CardTitle>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>{info.tooltip}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </CardHeader>
                 <CardContent className="space-y-3">
                   <div className={`text-3xl font-bold ${color}`}>
                     {metric.displayValue}
@@ -148,10 +165,10 @@ export default function CoreWebVitals({ metrics }) {
                 </CardContent>
               </Card>
             );
-          })}
-        </div>
+            })}
+          </div>
 
-        <Card className="mt-6 bg-muted/50 border-muted">
+          <Card className="mt-6 bg-muted/50 border-muted">
           <CardContent className="pt-6">
             <div className="flex items-start gap-3">
               <Info className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
@@ -164,9 +181,10 @@ export default function CoreWebVitals({ metrics }) {
                 </ul>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </CardContent>
-    </Card>
+            </CardContent>
+          </Card>
+        </CardContent>
+      </Card>
+    </TooltipProvider>
   );
 }
