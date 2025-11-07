@@ -2,167 +2,391 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { FileDown, Loader2 } from 'lucide-react';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
-export default function ExportPDF({ data }) {
+export default function ExportPDF({ mobileData, desktopData }) {
   const [isExporting, setIsExporting] = useState(false);
 
   const exportToPDF = async () => {
     setIsExporting(true);
 
     try {
-      // Create a new jsPDF instance
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 15;
+      const margin = 20;
       let yPosition = margin;
 
-      // Add header
-      pdf.setFillColor(99, 102, 241); // Primary color
-      pdf.rect(0, 0, pageWidth, 30, 'F');
+      // Helper function to check if we need a new page
+      const checkNewPage = (spaceNeeded = 20) => {
+        if (yPosition + spaceNeeded > pageHeight - 30) {
+          pdf.addPage();
+          yPosition = margin;
+          return true;
+        }
+        return false;
+      };
 
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(24);
+      // Add professional header
+      pdf.setFillColor(248, 250, 252); // Light gray background
+      pdf.rect(0, 0, pageWidth, 45, 'F');
+
+      // Add border to header
+      pdf.setDrawColor(226, 232, 240);
+      pdf.setLineWidth(0.5);
+      pdf.line(0, 45, pageWidth, 45);
+
+      // Title on the left
+      pdf.setTextColor(15, 23, 42); // Slate 900
+      pdf.setFontSize(26);
       pdf.setFont(undefined, 'bold');
-      pdf.text('Page Speed Report', margin, 20);
+      pdf.text('Website Performance Report', margin, 22);
 
-      // Add URL and date
-      yPosition = 40;
-      pdf.setTextColor(0, 0, 0);
+      // Scaling High branding on the right
       pdf.setFontSize(10);
+      pdf.setFont(undefined, 'bold');
+      pdf.setTextColor(99, 102, 241); // Primary color
+      const brandText = 'SCALING HIGH';
+      const brandWidth = pdf.getTextWidth(brandText);
+      pdf.text(brandText, pageWidth - margin - brandWidth, 18);
+
+      pdf.setFontSize(8);
       pdf.setFont(undefined, 'normal');
-      pdf.text(`URL: ${data.url}`, margin, yPosition);
+      pdf.setTextColor(100, 116, 139); // Slate 500
+      const tagline = 'Technologies';
+      const taglineWidth = pdf.getTextWidth(tagline);
+      pdf.text(tagline, pageWidth - margin - taglineWidth, 23);
+
+      // Report metadata
+      yPosition = 55;
+      pdf.setFontSize(10);
+      pdf.setTextColor(71, 85, 105); // Slate 600
+      pdf.setFont(undefined, 'normal');
+      pdf.text(`URL: ${mobileData?.url || desktopData?.url}`, margin, yPosition);
       yPosition += 6;
-      pdf.text(`Date: ${new Date(data.timestamp).toLocaleString()}`, margin, yPosition);
-      yPosition += 6;
-      pdf.text(`Strategy: ${data.strategy === 'mobile' ? 'Mobile' : 'Desktop'}`, margin, yPosition);
-      yPosition += 12;
+      pdf.text(`Generated: ${new Date().toLocaleString('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      })}`, margin, yPosition);
+      yPosition += 15;
 
-      // Add scores section
-      pdf.setFontSize(16);
+      // Section: Overview
+      pdf.setFontSize(18);
       pdf.setFont(undefined, 'bold');
-      pdf.text('Performance Scores', margin, yPosition);
-      yPosition += 8;
+      pdf.setTextColor(15, 23, 42);
+      pdf.text('Performance Overview', margin, yPosition);
+      yPosition += 10;
 
-      // Performance Score
-      pdf.setFontSize(12);
-      pdf.setFont(undefined, 'bold');
-      pdf.text('Performance:', margin, yPosition);
-      pdf.setFont(undefined, 'normal');
-      const perfColor = data.performanceScore >= 90 ? [12, 206, 107] : data.performanceScore >= 50 ? [255, 164, 0] : [255, 78, 66];
-      pdf.setTextColor(...perfColor);
-      pdf.text(`${data.performanceScore}`, margin + 40, yPosition);
-      pdf.setTextColor(0, 0, 0);
-      yPosition += 7;
+      // Mobile and Desktop Scores side by side
+      const colWidth = (pageWidth - 2 * margin - 10) / 2;
 
-      // Accessibility Score
-      pdf.setFont(undefined, 'bold');
-      pdf.text('Accessibility:', margin, yPosition);
-      pdf.setFont(undefined, 'normal');
-      const a11yColor = data.accessibilityScore >= 90 ? [12, 206, 107] : data.accessibilityScore >= 50 ? [255, 164, 0] : [255, 78, 66];
-      pdf.setTextColor(...a11yColor);
-      pdf.text(`${data.accessibilityScore}`, margin + 40, yPosition);
-      pdf.setTextColor(0, 0, 0);
-      yPosition += 7;
+      // Helper to draw score card
+      const drawScoreCard = (x, title, data, icon) => {
+        let cardY = yPosition;
 
-      // Best Practices Score
-      pdf.setFont(undefined, 'bold');
-      pdf.text('Best Practices:', margin, yPosition);
-      pdf.setFont(undefined, 'normal');
-      const bpColor = data.bestPracticesScore >= 90 ? [12, 206, 107] : data.bestPracticesScore >= 50 ? [255, 164, 0] : [255, 78, 66];
-      pdf.setTextColor(...bpColor);
-      pdf.text(`${data.bestPracticesScore}`, margin + 40, yPosition);
-      pdf.setTextColor(0, 0, 0);
-      yPosition += 7;
+        // Card background
+        pdf.setFillColor(249, 250, 251);
+        pdf.roundedRect(x, cardY, colWidth, 85, 3, 3, 'F');
 
-      // SEO Score
-      pdf.setFont(undefined, 'bold');
-      pdf.text('SEO:', margin, yPosition);
-      pdf.setFont(undefined, 'normal');
-      const seoColor = data.seoScore >= 90 ? [12, 206, 107] : data.seoScore >= 50 ? [255, 164, 0] : [255, 78, 66];
-      pdf.setTextColor(...seoColor);
-      pdf.text(`${data.seoScore}`, margin + 40, yPosition);
-      pdf.setTextColor(0, 0, 0);
-      yPosition += 12;
+        // Card border
+        pdf.setDrawColor(226, 232, 240);
+        pdf.setLineWidth(0.5);
+        pdf.roundedRect(x, cardY, colWidth, 85, 3, 3, 'S');
 
-      // Core Web Vitals
-      pdf.setFontSize(16);
-      pdf.setFont(undefined, 'bold');
-      pdf.text('Core Web Vitals', margin, yPosition);
-      yPosition += 8;
+        // Title with icon
+        pdf.setFontSize(12);
+        pdf.setFont(undefined, 'bold');
+        pdf.setTextColor(71, 85, 105);
+        pdf.text(`${icon} ${title}`, x + 5, cardY + 8);
+        cardY += 15;
 
-      pdf.setFontSize(11);
-      pdf.setFont(undefined, 'normal');
+        // Performance Score - Large
+        const perfScore = data.performanceScore;
+        const perfColor = perfScore >= 90 ? [12, 206, 107] : perfScore >= 50 ? [255, 164, 0] : [255, 78, 66];
+        pdf.setFontSize(32);
+        pdf.setFont(undefined, 'bold');
+        pdf.setTextColor(...perfColor);
+        pdf.text(`${perfScore}`, x + 5, cardY + 10);
 
-      if (data.metrics) {
-        // LCP
-        pdf.text(`LCP (Largest Contentful Paint): ${data.metrics.lcp.displayValue}`, margin, yPosition);
-        yPosition += 6;
+        pdf.setFontSize(9);
+        pdf.setTextColor(100, 116, 139);
+        pdf.setFont(undefined, 'normal');
+        pdf.text('Performance', x + 5, cardY + 16);
 
-        // CLS
-        pdf.text(`CLS (Cumulative Layout Shift): ${data.metrics.cls.displayValue}`, margin, yPosition);
-        yPosition += 6;
+        // Other scores
+        cardY += 22;
+        pdf.setFontSize(8);
+        pdf.setTextColor(71, 85, 105);
 
-        // FCP
-        pdf.text(`FCP (First Contentful Paint): ${data.metrics.fcp.displayValue}`, margin, yPosition);
-        yPosition += 6;
+        const scores = [
+          { label: 'Accessibility', value: data.accessibilityScore },
+          { label: 'Best Practices', value: data.bestPracticesScore },
+          { label: 'SEO', value: data.seoScore }
+        ];
 
-        // TBT
-        pdf.text(`TBT (Total Blocking Time): ${data.metrics.tbt.displayValue}`, margin, yPosition);
-        yPosition += 6;
+        scores.forEach((score, idx) => {
+          const scoreColor = score.value >= 90 ? [12, 206, 107] : score.value >= 50 ? [255, 164, 0] : [255, 78, 66];
+          pdf.setFont(undefined, 'normal');
+          pdf.setTextColor(71, 85, 105);
+          pdf.text(`${score.label}:`, x + 5, cardY);
+          pdf.setFont(undefined, 'bold');
+          pdf.setTextColor(...scoreColor);
+          pdf.text(`${score.value}`, x + 35, cardY);
+          cardY += 6;
+        });
+      };
 
-        // Speed Index
-        pdf.text(`Speed Index: ${data.metrics.speedIndex.displayValue}`, margin, yPosition);
-        yPosition += 12;
+      if (mobileData) {
+        drawScoreCard(margin, 'Mobile', mobileData, '📱');
       }
 
-      // Top Opportunities (if they fit on this page)
-      if (yPosition < pageHeight - 60 && data.opportunities && data.opportunities.length > 0) {
-        pdf.setFontSize(16);
+      if (desktopData) {
+        drawScoreCard(margin + colWidth + 10, 'Desktop', desktopData, '🖥️');
+      }
+
+      yPosition += 95;
+
+      // Section: Core Web Vitals
+      checkNewPage(60);
+      pdf.setFontSize(18);
+      pdf.setFont(undefined, 'bold');
+      pdf.setTextColor(15, 23, 42);
+      pdf.text('Core Web Vitals', margin, yPosition);
+      yPosition += 10;
+
+      // Helper to draw metrics table
+      const drawMetricsTable = (x, title, metrics, icon) => {
+        let tableY = yPosition;
+
+        // Title
+        pdf.setFontSize(11);
         pdf.setFont(undefined, 'bold');
-        pdf.text('Top Optimization Opportunities', margin, yPosition);
-        yPosition += 8;
+        pdf.setTextColor(71, 85, 105);
+        pdf.text(`${icon} ${title}`, x + 2, tableY);
+        tableY += 8;
 
-        pdf.setFontSize(10);
-        pdf.setFont(undefined, 'normal');
+        // Metrics
+        const metricsData = [
+          { name: 'LCP', full: 'Largest Contentful Paint', value: metrics.lcp?.displayValue || 'N/A' },
+          { name: 'CLS', full: 'Cumulative Layout Shift', value: metrics.cls?.displayValue || 'N/A' },
+          { name: 'FCP', full: 'First Contentful Paint', value: metrics.fcp?.displayValue || 'N/A' },
+          { name: 'TBT', full: 'Total Blocking Time', value: metrics.tbt?.displayValue || 'N/A' },
+          { name: 'SI', full: 'Speed Index', value: metrics.speedIndex?.displayValue || 'N/A' }
+        ];
 
-        const topOpportunities = data.opportunities.slice(0, 5);
-        topOpportunities.forEach((opp, index) => {
-          if (yPosition > pageHeight - 30) {
-            pdf.addPage();
-            yPosition = margin;
-          }
-
+        pdf.setFontSize(9);
+        metricsData.forEach((metric) => {
+          // Metric name
           pdf.setFont(undefined, 'bold');
-          pdf.text(`${index + 1}. ${opp.title}`, margin, yPosition);
-          yPosition += 5;
+          pdf.setTextColor(71, 85, 105);
+          pdf.text(metric.name, x + 2, tableY);
+
+          // Full name
+          pdf.setFont(undefined, 'normal');
+          pdf.setTextColor(100, 116, 139);
+          pdf.text(metric.full, x + 12, tableY);
+
+          // Value
+          pdf.setFont(undefined, 'bold');
+          pdf.setTextColor(15, 23, 42);
+          const valueWidth = pdf.getTextWidth(metric.value);
+          pdf.text(metric.value, x + colWidth - valueWidth - 2, tableY);
+
+          tableY += 6;
+        });
+
+        return tableY - yPosition + 8;
+      };
+
+      if (mobileData?.metrics) {
+        const height = drawMetricsTable(margin, 'Mobile Metrics', mobileData.metrics, '📱');
+        if (desktopData?.metrics) {
+          // Draw desktop on same level if on same page, otherwise below
+          if (yPosition + height < pageHeight - 40) {
+            drawMetricsTable(margin + colWidth + 10, 'Desktop Metrics', desktopData.metrics, '🖥️');
+          }
+        }
+      }
+
+      yPosition += 40;
+
+      // Section: Top Optimization Opportunities
+      checkNewPage(40);
+      pdf.setFontSize(18);
+      pdf.setFont(undefined, 'bold');
+      pdf.setTextColor(15, 23, 42);
+      pdf.text('Top Optimization Opportunities', margin, yPosition);
+      yPosition += 10;
+
+      // Combine and deduplicate opportunities from both mobile and desktop
+      const allOpportunities = [];
+      const seenTitles = new Set();
+
+      [mobileData, desktopData].forEach(data => {
+        if (data?.opportunities) {
+          data.opportunities.forEach(opp => {
+            if (!seenTitles.has(opp.title) && opp.priority === 'high') {
+              allOpportunities.push(opp);
+              seenTitles.add(opp.title);
+            }
+          });
+        }
+      });
+
+      // Show top 8 high-priority opportunities
+      const topOpportunities = allOpportunities.slice(0, 8);
+
+      topOpportunities.forEach((opp, index) => {
+        checkNewPage(20);
+
+        // Background for each opportunity
+        pdf.setFillColor(254, 252, 232); // Amber 50
+        pdf.roundedRect(margin, yPosition - 3, pageWidth - 2 * margin, 14, 2, 2, 'F');
+
+        // Number badge
+        pdf.setFillColor(251, 191, 36); // Amber 400
+        pdf.circle(margin + 4, yPosition + 2, 3, 'F');
+        pdf.setFontSize(8);
+        pdf.setFont(undefined, 'bold');
+        pdf.setTextColor(255, 255, 255);
+        pdf.text(`${index + 1}`, margin + 4 - pdf.getTextWidth(`${index + 1}`) / 2, yPosition + 3);
+
+        // Title
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'bold');
+        pdf.setTextColor(15, 23, 42);
+        pdf.text(opp.title, margin + 10, yPosition + 2);
+
+        // Savings
+        pdf.setFontSize(8);
+        pdf.setFont(undefined, 'normal');
+        pdf.setTextColor(100, 116, 139);
+        let savingsText = '';
+        if (opp.savings.ms > 0) {
+          savingsText = `Save: ${(opp.savings.ms / 1000).toFixed(2)}s`;
+        }
+        if (opp.savings.bytes > 0) {
+          savingsText += savingsText ? ' | ' : 'Save: ';
+          savingsText += `${Math.round(opp.savings.bytes / 1024)}KB`;
+        }
+        if (savingsText) {
+          pdf.text(savingsText, margin + 10, yPosition + 8);
+        }
+
+        yPosition += 18;
+      });
+
+      // Add SEO Issues if available
+      if ((mobileData?.seoIssues?.length > 0 || desktopData?.seoIssues?.length > 0)) {
+        checkNewPage(40);
+        pdf.setFontSize(18);
+        pdf.setFont(undefined, 'bold');
+        pdf.setTextColor(15, 23, 42);
+        pdf.text('SEO Analysis', margin, yPosition);
+        yPosition += 10;
+
+        const seoIssues = mobileData?.seoIssues || desktopData?.seoIssues || [];
+        const highPriorityIssues = seoIssues.filter(issue => issue.priority === 'high').slice(0, 5);
+
+        highPriorityIssues.forEach((issue, index) => {
+          checkNewPage(15);
+
+          pdf.setFontSize(9);
+          pdf.setFont(undefined, 'bold');
+          pdf.setTextColor(220, 38, 38); // Red 600
+          pdf.text(`⚠ ${issue.title}`, margin, yPosition);
+          yPosition += 6;
 
           pdf.setFont(undefined, 'normal');
-          if (opp.savings.ms > 0) {
-            pdf.text(`  Potential savings: ${Math.round(opp.savings.ms / 1000)}s`, margin, yPosition);
-            yPosition += 5;
-          }
-          yPosition += 2;
+          pdf.setFontSize(8);
+          pdf.setTextColor(71, 85, 105);
+          const descLines = pdf.splitTextToSize(issue.description, pageWidth - 2 * margin - 5);
+          pdf.text(descLines, margin + 3, yPosition);
+          yPosition += descLines.length * 4 + 4;
         });
       }
 
-      // Add footer
+      // Resource Breakdown
+      if (mobileData?.resourceBreakdown || desktopData?.resourceBreakdown) {
+        checkNewPage(50);
+        pdf.setFontSize(18);
+        pdf.setFont(undefined, 'bold');
+        pdf.setTextColor(15, 23, 42);
+        pdf.text('Resource Breakdown', margin, yPosition);
+        yPosition += 10;
+
+        const drawResourceTable = (x, title, breakdown, icon) => {
+          let tableY = yPosition;
+
+          pdf.setFontSize(11);
+          pdf.setFont(undefined, 'bold');
+          pdf.setTextColor(71, 85, 105);
+          pdf.text(`${icon} ${title}`, x + 2, tableY);
+          tableY += 8;
+
+          pdf.setFontSize(8);
+          Object.entries(breakdown).forEach(([type, data]) => {
+            const displayType = type.charAt(0).toUpperCase() + type.slice(1);
+            const sizeKB = Math.round(data.size / 1024);
+
+            pdf.setFont(undefined, 'normal');
+            pdf.setTextColor(71, 85, 105);
+            pdf.text(displayType, x + 2, tableY);
+
+            pdf.setFont(undefined, 'bold');
+            pdf.setTextColor(15, 23, 42);
+            pdf.text(`${sizeKB} KB`, x + 30, tableY);
+
+            pdf.setFont(undefined, 'normal');
+            pdf.setTextColor(100, 116, 139);
+            pdf.text(`(${data.count} files)`, x + 50, tableY);
+
+            tableY += 5;
+          });
+        };
+
+        if (mobileData?.resourceBreakdown) {
+          drawResourceTable(margin, 'Mobile', mobileData.resourceBreakdown, '📱');
+        }
+
+        if (desktopData?.resourceBreakdown) {
+          drawResourceTable(margin + colWidth + 10, 'Desktop', desktopData.resourceBreakdown, '🖥️');
+        }
+      }
+
+      // Add footer to all pages
       const totalPages = pdf.internal.pages.length - 1;
       for (let i = 1; i <= totalPages; i++) {
         pdf.setPage(i);
+
+        // Footer line
+        pdf.setDrawColor(226, 232, 240);
+        pdf.setLineWidth(0.5);
+        pdf.line(margin, pageHeight - 20, pageWidth - margin, pageHeight - 20);
+
+        // Footer text
         pdf.setFontSize(8);
-        pdf.setTextColor(128, 128, 128);
+        pdf.setTextColor(100, 116, 139);
+        pdf.setFont(undefined, 'normal');
         pdf.text(
-          `Generated by Page Speed Analyzer - ${new Date().toLocaleDateString()}`,
+          'Powered by Scaling High Technologies | https://www.scalinghigh.com',
           margin,
-          pageHeight - 10
+          pageHeight - 13
         );
-        pdf.text(`Page ${i} of ${totalPages}`, pageWidth - margin - 20, pageHeight - 10);
+
+        pdf.setFont(undefined, 'bold');
+        pdf.text(`Page ${i} of ${totalPages}`, pageWidth - margin - 20, pageHeight - 13);
+
+        pdf.setFont(undefined, 'normal');
+        pdf.setFontSize(7);
+        pdf.text(
+          `Generated: ${new Date().toLocaleDateString()}`,
+          pageWidth - margin - 35,
+          pageHeight - 8
+        );
       }
 
       // Save the PDF
-      const filename = `page-speed-report-${new Date().getTime()}.pdf`;
+      const filename = `website-performance-report-${new Date().getTime()}.pdf`;
       pdf.save(filename);
 
     } catch (error) {
@@ -176,7 +400,7 @@ export default function ExportPDF({ data }) {
   return (
     <Button
       onClick={exportToPDF}
-      disabled={isExporting}
+      disabled={isExporting || (!mobileData && !desktopData)}
       variant="outline"
       className="gap-2"
     >

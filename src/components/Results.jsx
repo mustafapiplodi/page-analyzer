@@ -31,7 +31,7 @@ export default function Results({ data, onAnalyze, mobileResults, desktopResults
         <CardContent className="pt-6">
           <div className="flex items-start justify-between gap-4 mb-4">
             <h2 className="text-2xl font-bold">Analysis Results</h2>
-            {currentData && <ExportPDF data={currentData} />}
+            <ExportPDF mobileData={mobileResults} desktopData={desktopResults} />
           </div>
           {currentData && (
             <div className="space-y-3">
