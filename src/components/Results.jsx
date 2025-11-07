@@ -90,12 +90,21 @@ export default function Results({ data, onAnalyze, mobileResults, desktopResults
 
       {/* Mobile vs Desktop Comparison - Always visible at bottom */}
       {mobileResults && desktopResults && (
-        <MobileDesktopComparison
-          mobileResults={mobileResults}
-          desktopResults={desktopResults}
-          onAnalyze={onAnalyze}
-          currentUrl={mobileResults.url}
-        />
+        <>
+          <MobileDesktopComparison
+            mobileResults={mobileResults}
+            desktopResults={desktopResults}
+            onAnalyze={onAnalyze}
+            currentUrl={mobileResults.url}
+          />
+
+          {/* Competitor Analysis */}
+          <CompetitorComparison
+            mobileResults={mobileResults}
+            desktopResults={desktopResults}
+            onAnalyze={onAnalyze}
+          />
+        </>
       )}
 
       <div className="flex justify-center mt-8 mb-6">
