@@ -26,57 +26,20 @@ export default function ExportPDF({ mobileData, desktopData }) {
         return false;
       };
 
-      // Load and embed logo
-      let logoDataUrl = null;
-      try {
-        const logoResponse = await fetch('/assets/logo.png');
-        const logoBlob = await logoResponse.blob();
-        logoDataUrl = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.readAsDataURL(logoBlob);
-        });
-      } catch (error) {
-        console.warn('Could not load logo:', error);
-      }
-
       // Add professional header
       pdf.setFillColor(248, 250, 252); // Light gray background
-      pdf.rect(0, 0, pageWidth, 45, 'F');
+      pdf.rect(0, 0, pageWidth, 40, 'F');
 
       // Add border to header
       pdf.setDrawColor(226, 232, 240);
       pdf.setLineWidth(0.5);
-      pdf.line(0, 45, pageWidth, 45);
+      pdf.line(0, 40, pageWidth, 40);
 
-      // Title on the left
+      // Title
       pdf.setTextColor(15, 23, 42); // Slate 900
-      pdf.setFontSize(26);
+      pdf.setFontSize(24);
       pdf.setFont(undefined, 'bold');
-      pdf.text('Website Performance Report', margin, 22);
-
-      // Logo on the right
-      if (logoDataUrl) {
-        // Add logo - adjust size to fit nicely in header
-        const logoWidth = 45; // mm
-        const logoHeight = 12; // mm (maintaining aspect ratio approximately)
-        pdf.addImage(logoDataUrl, 'PNG', pageWidth - margin - logoWidth, 12, logoWidth, logoHeight);
-      } else {
-        // Fallback to text branding if logo fails to load
-        pdf.setFontSize(10);
-        pdf.setFont(undefined, 'bold');
-        pdf.setTextColor(99, 102, 241); // Primary color
-        const brandText = 'SCALING HIGH';
-        const brandWidth = pdf.getTextWidth(brandText);
-        pdf.text(brandText, pageWidth - margin - brandWidth, 18);
-
-        pdf.setFontSize(8);
-        pdf.setFont(undefined, 'normal');
-        pdf.setTextColor(100, 116, 139); // Slate 500
-        const tagline = 'Technologies';
-        const taglineWidth = pdf.getTextWidth(tagline);
-        pdf.text(tagline, pageWidth - margin - taglineWidth, 23);
-      }
+      pdf.text('Website Performance Report', margin, 25);
 
       // Report metadata
       yPosition = 55;
@@ -102,23 +65,24 @@ export default function ExportPDF({ mobileData, desktopData }) {
       const colWidth = (pageWidth - 2 * margin - 10) / 2;
 
       // Helper to draw score card
-      const drawScoreCard = (x, title, data, icon) => {
+      const drawScoreCard = (x, title, data) => {
         let cardY = yPosition;
 
-        // Card background
-        pdf.setFillColor(249, 250, 251);
-        pdf.roundedRect(x, cardY, colWidth, 85, 3, 3, 'F');
-
-        // Card border
+        // Card background with subtle border
+        pdf.setFillColor(255, 255, 255);
         pdf.setDrawColor(226, 232, 240);
-        pdf.setLineWidth(0.5);
-        pdf.roundedRect(x, cardY, colWidth, 85, 3, 3, 'S');
+        pdf.setLineWidth(1);
+        pdf.rect(x, cardY, colWidth, 75, 'FD');
 
-        // Title with icon
-        pdf.setFontSize(12);
+        // Title bar
+        pdf.setFillColor(248, 250, 252);
+        pdf.rect(x, cardY, colWidth, 10, 'F');
+
+        // Title
+        pdf.setFontSize(11);
         pdf.setFont(undefined, 'bold');
         pdf.setTextColor(71, 85, 105);
-        pdf.text(`${icon} ${title}`, x + 5, cardY + 8);
+        pdf.text(title, x + 5, cardY + 7);
         cardY += 15;
 
         // Performance Score - Large
@@ -158,14 +122,14 @@ export default function ExportPDF({ mobileData, desktopData }) {
       };
 
       if (mobileData) {
-        drawScoreCard(margin, 'Mobile', mobileData, '📱');
+        drawScoreCard(margin, 'Mobile Performance', mobileData);
       }
 
       if (desktopData) {
-        drawScoreCard(margin + colWidth + 10, 'Desktop', desktopData, '🖥️');
+        drawScoreCard(margin + colWidth + 10, 'Desktop Performance', desktopData);
       }
 
-      yPosition += 95;
+      yPosition += 85;
 
       // Section: Core Web Vitals
       checkNewPage(60);
@@ -176,15 +140,18 @@ export default function ExportPDF({ mobileData, desktopData }) {
       yPosition += 10;
 
       // Helper to draw metrics table
-      const drawMetricsTable = (x, title, metrics, icon) => {
+      const drawMetricsTable = (x, title, metrics) => {
         let tableY = yPosition;
 
-        // Title
-        pdf.setFontSize(11);
+        // Title with background
+        pdf.setFillColor(248, 250, 252);
+        pdf.rect(x, tableY - 5, colWidth, 8, 'F');
+
+        pdf.setFontSize(10);
         pdf.setFont(undefined, 'bold');
         pdf.setTextColor(71, 85, 105);
-        pdf.text(`${icon} ${title}`, x + 2, tableY);
-        tableY += 8;
+        pdf.text(title, x + 2, tableY);
+        tableY += 6;
 
         // Metrics
         const metricsData = [
@@ -220,11 +187,11 @@ export default function ExportPDF({ mobileData, desktopData }) {
       };
 
       if (mobileData?.metrics) {
-        const height = drawMetricsTable(margin, 'Mobile Metrics', mobileData.metrics, '📱');
+        const height = drawMetricsTable(margin, 'Mobile Metrics', mobileData.metrics);
         if (desktopData?.metrics) {
           // Draw desktop on same level if on same page, otherwise below
           if (yPosition + height < pageHeight - 40) {
-            drawMetricsTable(margin + colWidth + 10, 'Desktop Metrics', desktopData.metrics, '🖥️');
+            drawMetricsTable(margin + colWidth + 10, 'Desktop Metrics', desktopData.metrics);
           }
         }
       }
@@ -258,25 +225,26 @@ export default function ExportPDF({ mobileData, desktopData }) {
       const topOpportunities = allOpportunities.slice(0, 8);
 
       topOpportunities.forEach((opp, index) => {
-        checkNewPage(20);
+        checkNewPage(15);
 
-        // Background for each opportunity
-        pdf.setFillColor(254, 252, 232); // Amber 50
-        pdf.roundedRect(margin, yPosition - 3, pageWidth - 2 * margin, 14, 2, 2, 'F');
+        // Alternating background
+        if (index % 2 === 0) {
+          pdf.setFillColor(249, 250, 251);
+          pdf.rect(margin, yPosition - 2, pageWidth - 2 * margin, 12, 'F');
+        }
 
-        // Number badge
-        pdf.setFillColor(251, 191, 36); // Amber 400
-        pdf.circle(margin + 4, yPosition + 2, 3, 'F');
-        pdf.setFontSize(8);
+        // Number
+        pdf.setFontSize(9);
         pdf.setFont(undefined, 'bold');
-        pdf.setTextColor(255, 255, 255);
-        pdf.text(`${index + 1}`, margin + 4 - pdf.getTextWidth(`${index + 1}`) / 2, yPosition + 3);
+        pdf.setTextColor(100, 116, 139);
+        pdf.text(`${index + 1}.`, margin + 2, yPosition + 3);
 
         // Title
-        pdf.setFontSize(10);
+        pdf.setFontSize(9);
         pdf.setFont(undefined, 'bold');
         pdf.setTextColor(15, 23, 42);
-        pdf.text(opp.title, margin + 10, yPosition + 2);
+        const titleText = pdf.splitTextToSize(opp.title, pageWidth - 2 * margin - 20);
+        pdf.text(titleText[0], margin + 8, yPosition + 3);
 
         // Savings
         pdf.setFontSize(8);
@@ -284,17 +252,17 @@ export default function ExportPDF({ mobileData, desktopData }) {
         pdf.setTextColor(100, 116, 139);
         let savingsText = '';
         if (opp.savings.ms > 0) {
-          savingsText = `Save: ${(opp.savings.ms / 1000).toFixed(2)}s`;
+          savingsText = `Potential savings: ${(opp.savings.ms / 1000).toFixed(2)}s`;
         }
         if (opp.savings.bytes > 0) {
-          savingsText += savingsText ? ' | ' : 'Save: ';
+          savingsText += savingsText ? ', ' : 'Potential savings: ';
           savingsText += `${Math.round(opp.savings.bytes / 1024)}KB`;
         }
         if (savingsText) {
-          pdf.text(savingsText, margin + 10, yPosition + 8);
+          pdf.text(savingsText, margin + 8, yPosition + 8);
         }
 
-        yPosition += 18;
+        yPosition += 14;
       });
 
       // Add SEO Issues if available
@@ -315,7 +283,7 @@ export default function ExportPDF({ mobileData, desktopData }) {
           pdf.setFontSize(9);
           pdf.setFont(undefined, 'bold');
           pdf.setTextColor(220, 38, 38); // Red 600
-          pdf.text(`⚠ ${issue.title}`, margin, yPosition);
+          pdf.text(`[!] ${issue.title}`, margin, yPosition);
           yPosition += 6;
 
           pdf.setFont(undefined, 'normal');
@@ -336,14 +304,18 @@ export default function ExportPDF({ mobileData, desktopData }) {
         pdf.text('Resource Breakdown', margin, yPosition);
         yPosition += 10;
 
-        const drawResourceTable = (x, title, breakdown, icon) => {
+        const drawResourceTable = (x, title, breakdown) => {
           let tableY = yPosition;
 
-          pdf.setFontSize(11);
+          // Title with background
+          pdf.setFillColor(248, 250, 252);
+          pdf.rect(x, tableY - 5, colWidth, 8, 'F');
+
+          pdf.setFontSize(10);
           pdf.setFont(undefined, 'bold');
           pdf.setTextColor(71, 85, 105);
-          pdf.text(`${icon} ${title}`, x + 2, tableY);
-          tableY += 8;
+          pdf.text(title, x + 2, tableY);
+          tableY += 6;
 
           pdf.setFontSize(8);
           Object.entries(breakdown).forEach(([type, data]) => {
@@ -367,11 +339,11 @@ export default function ExportPDF({ mobileData, desktopData }) {
         };
 
         if (mobileData?.resourceBreakdown) {
-          drawResourceTable(margin, 'Mobile', mobileData.resourceBreakdown, '📱');
+          drawResourceTable(margin, 'Mobile Resources', mobileData.resourceBreakdown);
         }
 
         if (desktopData?.resourceBreakdown) {
-          drawResourceTable(margin + colWidth + 10, 'Desktop', desktopData.resourceBreakdown, '🖥️');
+          drawResourceTable(margin + colWidth + 10, 'Desktop Resources', desktopData.resourceBreakdown);
         }
       }
 
