@@ -276,28 +276,66 @@ export default function CompetitorComparison({ currentSite, onAnalyze }) {
           </div>
         )}
 
-        {competitors.length > 0 && (
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <h4 className="font-semibold mb-2">Competitive Analysis</h4>
-            <p className="text-sm text-muted-foreground mb-3">
-              Once competitors are tested, you'll see:
-            </p>
-            <ul className="text-sm space-y-1">
-              <li className="flex items-center gap-2">
-                <TrendingUp className="h-3 w-3 text-good" />
-                Performance gaps and advantages
-              </li>
-              <li className="flex items-center gap-2">
-                <TrendingDown className="h-3 w-3 text-poor" />
-                Areas where competitors are faster
-              </li>
-              <li className="flex items-center gap-2">
-                <Minus className="h-3 w-3 text-muted-foreground" />
-                Detailed metric-by-metric comparison
-              </li>
-            </ul>
-          </div>
-        )}
+        {competitors.length > 0 && (() => {
+          const testedCompetitors = competitors.filter(c => c.tested && c.data);
+          const betterThanYou = testedCompetitors.filter(c => c.data.performanceScore > currentSite.performanceScore);
+          const worseThanYou = testedCompetitors.filter(c => c.data.performanceScore < currentSite.performanceScore);
+          const sameAsYou = testedCompetitors.filter(c => c.data.performanceScore === currentSite.performanceScore);
+
+          if (testedCompetitors.length === 0) {
+            return (
+              <div className="mt-6 p-4 bg-muted rounded-lg">
+                <h4 className="font-semibold mb-2">Competitive Analysis</h4>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Once competitors are tested, you'll see:
+                </p>
+                <ul className="text-sm space-y-1">
+                  <li className="flex items-center gap-2">
+                    <TrendingUp className="h-3 w-3 text-good" />
+                    Performance gaps and advantages
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <TrendingDown className="h-3 w-3 text-poor" />
+                    Areas where competitors are faster
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Minus className="h-3 w-3 text-muted-foreground" />
+                    Detailed metric-by-metric comparison
+                  </li>
+                </ul>
+              </div>
+            );
+          }
+
+          return (
+            <div className="mt-6 p-4 bg-muted rounded-lg">
+              <h4 className="font-semibold mb-2">Competitive Analysis</h4>
+              <p className="text-sm text-muted-foreground mb-3">
+                Comparison results based on {testedCompetitors.length} tested competitor{testedCompetitors.length > 1 ? 's' : ''}:
+              </p>
+              <ul className="text-sm space-y-1">
+                {worseThanYou.length > 0 && (
+                  <li className="flex items-center gap-2">
+                    <TrendingUp className="h-3 w-3 text-good" />
+                    You're faster than {worseThanYou.length} competitor{worseThanYou.length > 1 ? 's' : ''} by {Math.round(worseThanYou.reduce((sum, c) => sum + (currentSite.performanceScore - c.data.performanceScore), 0) / worseThanYou.length)} pts avg
+                  </li>
+                )}
+                {betterThanYou.length > 0 && (
+                  <li className="flex items-center gap-2">
+                    <TrendingDown className="h-3 w-3 text-poor" />
+                    {betterThanYou.length} competitor{betterThanYou.length > 1 ? 's are' : ' is'} faster than you by {Math.round(betterThanYou.reduce((sum, c) => sum + (c.data.performanceScore - currentSite.performanceScore), 0) / betterThanYou.length)} pts avg
+                  </li>
+                )}
+                {sameAsYou.length > 0 && (
+                  <li className="flex items-center gap-2">
+                    <Minus className="h-3 w-3 text-muted-foreground" />
+                    {sameAsYou.length} competitor{sameAsYou.length > 1 ? 's have' : ' has'} the same performance score
+                  </li>
+                )}
+              </ul>
+            </div>
+          );
+        })()}
       </CardContent>
     </Card>
   );
