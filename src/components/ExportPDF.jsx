@@ -26,6 +26,20 @@ export default function ExportPDF({ mobileData, desktopData }) {
         return false;
       };
 
+      // Load and embed logo
+      let logoDataUrl = null;
+      try {
+        const logoResponse = await fetch('/assets/logo.png');
+        const logoBlob = await logoResponse.blob();
+        logoDataUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(logoBlob);
+        });
+      } catch (error) {
+        console.warn('Could not load logo:', error);
+      }
+
       // Add professional header
       pdf.setFillColor(248, 250, 252); // Light gray background
       pdf.rect(0, 0, pageWidth, 45, 'F');
@@ -41,20 +55,28 @@ export default function ExportPDF({ mobileData, desktopData }) {
       pdf.setFont(undefined, 'bold');
       pdf.text('Website Performance Report', margin, 22);
 
-      // Scaling High branding on the right
-      pdf.setFontSize(10);
-      pdf.setFont(undefined, 'bold');
-      pdf.setTextColor(99, 102, 241); // Primary color
-      const brandText = 'SCALING HIGH';
-      const brandWidth = pdf.getTextWidth(brandText);
-      pdf.text(brandText, pageWidth - margin - brandWidth, 18);
+      // Logo on the right
+      if (logoDataUrl) {
+        // Add logo - adjust size to fit nicely in header
+        const logoWidth = 45; // mm
+        const logoHeight = 12; // mm (maintaining aspect ratio approximately)
+        pdf.addImage(logoDataUrl, 'PNG', pageWidth - margin - logoWidth, 12, logoWidth, logoHeight);
+      } else {
+        // Fallback to text branding if logo fails to load
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'bold');
+        pdf.setTextColor(99, 102, 241); // Primary color
+        const brandText = 'SCALING HIGH';
+        const brandWidth = pdf.getTextWidth(brandText);
+        pdf.text(brandText, pageWidth - margin - brandWidth, 18);
 
-      pdf.setFontSize(8);
-      pdf.setFont(undefined, 'normal');
-      pdf.setTextColor(100, 116, 139); // Slate 500
-      const tagline = 'Technologies';
-      const taglineWidth = pdf.getTextWidth(tagline);
-      pdf.text(tagline, pageWidth - margin - taglineWidth, 23);
+        pdf.setFontSize(8);
+        pdf.setFont(undefined, 'normal');
+        pdf.setTextColor(100, 116, 139); // Slate 500
+        const tagline = 'Technologies';
+        const taglineWidth = pdf.getTextWidth(tagline);
+        pdf.text(tagline, pageWidth - margin - taglineWidth, 23);
+      }
 
       // Report metadata
       yPosition = 55;
