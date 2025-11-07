@@ -44,17 +44,25 @@ export default async function handler(req, res) {
     const apiUrl = new URL(apiEndpoint);
     apiUrl.searchParams.set('url', url);
     apiUrl.searchParams.set('strategy', strategy);
-    apiUrl.searchParams.set('category', 'performance');
-    apiUrl.searchParams.set('category', 'accessibility');
-    apiUrl.searchParams.set('category', 'best-practices');
+    // Use append() instead of set() for multiple categories
+    apiUrl.searchParams.append('category', 'performance');
+    apiUrl.searchParams.append('category', 'accessibility');
+    apiUrl.searchParams.append('category', 'best-practices');
 
-    // Add API key if available (optional for now, can be added via environment variable)
+    // Add API key if available
     if (process.env.PAGESPEED_API_KEY) {
       apiUrl.searchParams.set('key', process.env.PAGESPEED_API_KEY);
     }
 
-    // Make request to PageSpeed API
-    const response = await fetch(apiUrl.toString());
+    // Make request to PageSpeed API with timeout handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
+
+    const response = await fetch(apiUrl.toString(), {
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
 
     // Handle rate limiting
     if (response.status === 429) {

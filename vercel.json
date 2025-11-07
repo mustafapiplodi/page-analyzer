@@ -5,6 +5,11 @@
   "installCommand": "npm install",
   "framework": null,
   "outputDirectory": "dist",
+  "functions": {
+    "api/**/*.js": {
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
