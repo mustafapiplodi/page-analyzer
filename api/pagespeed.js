@@ -45,6 +45,8 @@ export default async function handler(req, res) {
     apiUrl.searchParams.set('url', url);
     apiUrl.searchParams.set('strategy', strategy);
     apiUrl.searchParams.set('category', 'performance');
+    apiUrl.searchParams.set('category', 'accessibility');
+    apiUrl.searchParams.set('category', 'best-practices');
 
     // Add API key if available (optional for now, can be added via environment variable)
     if (process.env.PAGESPEED_API_KEY) {
@@ -85,6 +87,9 @@ export default async function handler(req, res) {
     const categories = lighthouseResult.categories;
     const audits = lighthouseResult.audits;
 
+    // Detect framework/stack
+    const detectedStack = detectFramework(audits, lighthouseResult);
+
     // Build response with essential data
     const result = {
       url: data.id,
@@ -93,6 +98,15 @@ export default async function handler(req, res) {
 
       // Performance score
       performanceScore: Math.round(categories.performance.score * 100),
+
+      // Accessibility score
+      accessibilityScore: Math.round(categories.accessibility.score * 100),
+
+      // Best practices score
+      bestPracticesScore: Math.round(categories['best-practices'].score * 100),
+
+      // Detected stack/framework
+      detectedStack: detectedStack,
 
       // Core Web Vitals (Lab data)
       metrics: {
@@ -129,8 +143,11 @@ export default async function handler(req, res) {
         metrics: data.loadingExperience.metrics || null
       } : null,
 
-      // Top opportunities for optimization
-      opportunities: extractOpportunities(audits),
+      // Top opportunities for optimization (framework-aware)
+      opportunities: extractOpportunities(audits, detectedStack),
+
+      // Accessibility issues
+      accessibilityIssues: extractAccessibilityIssues(audits),
 
       // Screenshot
       screenshot: lighthouseResult.audits['final-screenshot']?.details?.data || null
@@ -149,7 +166,7 @@ export default async function handler(req, res) {
 /**
  * Extract top optimization opportunities from audits
  */
-function extractOpportunities(audits) {
+function extractOpportunities(audits, detectedStack) {
   const opportunities = [];
 
   const opportunityAudits = [
@@ -162,13 +179,15 @@ function extractOpportunities(audits) {
     'unminified-javascript',
     'efficient-animated-content',
     'uses-text-compression',
-    'uses-responsive-images'
+    'uses-responsive-images',
+    'uses-optimized-images',
+    'uses-webp-images'
   ];
 
   for (const auditId of opportunityAudits) {
     const audit = audits[auditId];
     if (audit && audit.details && audit.score !== null && audit.score < 1) {
-      opportunities.push({
+      const opportunity = {
         id: auditId,
         title: audit.title,
         description: audit.description,
@@ -177,8 +196,11 @@ function extractOpportunities(audits) {
         savings: {
           ms: audit.details.overallSavingsMs || 0,
           bytes: audit.details.overallSavingsBytes || 0
-        }
-      });
+        },
+        // Add framework-specific recommendations
+        frameworkAdvice: getFrameworkSpecificAdvice(auditId, detectedStack)
+      };
+      opportunities.push(opportunity);
     }
   }
 
@@ -186,4 +208,189 @@ function extractOpportunities(audits) {
   opportunities.sort((a, b) => b.savings.ms - a.savings.ms);
 
   return opportunities.slice(0, 10); // Return top 10
+}
+
+/**
+ * Detect framework/tech stack from audits
+ */
+function detectFramework(audits, lighthouseResult) {
+  const detectedStack = {
+    framework: null,
+    libraries: [],
+    cms: null,
+    bundler: null,
+    confidence: 'low'
+  };
+
+  // Get script treemap data
+  const scripts = lighthouseResult.audits['script-treemap-data']?.details?.nodes || [];
+  const finalUrl = lighthouseResult.finalUrl || '';
+
+  // Analyze script names and content
+  const scriptNames = scripts.map(s => s.name?.toLowerCase() || '').join(' ');
+
+  // Framework detection
+  if (scriptNames.includes('react') || scriptNames.includes('_react')) {
+    if (scriptNames.includes('next') || scriptNames.includes('_next')) {
+      detectedStack.framework = 'Next.js';
+      detectedStack.confidence = 'high';
+    } else if (scriptNames.includes('gatsby')) {
+      detectedStack.framework = 'Gatsby';
+      detectedStack.confidence = 'high';
+    } else {
+      detectedStack.framework = 'React';
+      detectedStack.confidence = 'medium';
+    }
+  } else if (scriptNames.includes('vue')) {
+    if (scriptNames.includes('nuxt')) {
+      detectedStack.framework = 'Nuxt.js';
+      detectedStack.confidence = 'high';
+    } else {
+      detectedStack.framework = 'Vue.js';
+      detectedStack.confidence = 'medium';
+    }
+  } else if (scriptNames.includes('angular')) {
+    detectedStack.framework = 'Angular';
+    detectedStack.confidence = 'medium';
+  } else if (scriptNames.includes('svelte')) {
+    detectedStack.framework = 'Svelte';
+    detectedStack.confidence = 'medium';
+  }
+
+  // CMS detection
+  if (finalUrl.includes('wp-content') || scriptNames.includes('wp-')) {
+    detectedStack.cms = 'WordPress';
+  } else if (scriptNames.includes('shopify')) {
+    detectedStack.cms = 'Shopify';
+  } else if (scriptNames.includes('wix')) {
+    detectedStack.cms = 'Wix';
+  } else if (scriptNames.includes('squarespace')) {
+    detectedStack.cms = 'Squarespace';
+  }
+
+  // Bundler detection
+  if (scriptNames.includes('webpack')) {
+    detectedStack.bundler = 'Webpack';
+  } else if (scriptNames.includes('vite')) {
+    detectedStack.bundler = 'Vite';
+  } else if (scriptNames.includes('rollup')) {
+    detectedStack.bundler = 'Rollup';
+  }
+
+  // Library detection
+  if (scriptNames.includes('jquery')) {
+    detectedStack.libraries.push('jQuery');
+  }
+  if (scriptNames.includes('lodash')) {
+    detectedStack.libraries.push('Lodash');
+  }
+
+  return detectedStack;
+}
+
+/**
+ * Get framework-specific advice for an optimization
+ */
+function getFrameworkSpecificAdvice(auditId, detectedStack) {
+  const { framework, cms } = detectedStack;
+
+  const adviceMap = {
+    'unused-javascript': {
+      'React': {
+        tip: 'Use React.lazy() for code splitting',
+        code: `const MyComponent = React.lazy(() => import('./MyComponent'));`,
+        effort: 'Medium',
+        impact: 'High'
+      },
+      'Next.js': {
+        tip: 'Use Next.js dynamic imports',
+        code: `const DynamicComponent = dynamic(() => import('../components/hello'));`,
+        effort: 'Easy',
+        impact: 'High'
+      },
+      'Vue.js': {
+        tip: 'Use Vue async components',
+        code: `const AsyncComp = defineAsyncComponent(() => import('./MyComponent.vue'));`,
+        effort: 'Medium',
+        impact: 'High'
+      }
+    },
+    'modern-image-formats': {
+      'Next.js': {
+        tip: 'Use Next.js Image component (auto WebP/AVIF)',
+        code: `<Image src="/hero.jpg" width={1200} height={600} alt="Hero" />`,
+        effort: 'Easy',
+        impact: 'Very High'
+      },
+      'WordPress': {
+        tip: 'Install WebP Express or Imagify plugin',
+        code: null,
+        effort: 'Easy',
+        impact: 'High'
+      }
+    },
+    'offscreen-images': {
+      'React': {
+        tip: 'Use react-lazy-load or native loading="lazy"',
+        code: `<img src="/image.jpg" loading="lazy" alt="Description" />`,
+        effort: 'Easy',
+        impact: 'Medium'
+      },
+      'Next.js': {
+        tip: 'Use Next.js Image with priority prop carefully',
+        code: `<Image src="/hero.jpg" priority /> // Only for above-fold images`,
+        effort: 'Easy',
+        impact: 'High'
+      }
+    }
+  };
+
+  // Return framework-specific advice if available
+  if (adviceMap[auditId] && framework && adviceMap[auditId][framework]) {
+    return adviceMap[auditId][framework];
+  }
+
+  // Return CMS-specific advice if available
+  if (adviceMap[auditId] && cms && adviceMap[auditId][cms]) {
+    return adviceMap[auditId][cms];
+  }
+
+  return null;
+}
+
+/**
+ * Extract accessibility issues
+ */
+function extractAccessibilityIssues(audits) {
+  const issues = [];
+
+  const a11yAudits = [
+    'color-contrast',
+    'image-alt',
+    'button-name',
+    'link-name',
+    'meta-viewport',
+    'document-title',
+    'html-has-lang',
+    'aria-required-attr',
+    'aria-valid-attr-value',
+    'label',
+    'tap-targets'
+  ];
+
+  for (const auditId of a11yAudits) {
+    const audit = audits[auditId];
+    if (audit && audit.score !== null && audit.score < 1) {
+      issues.push({
+        id: auditId,
+        title: audit.title,
+        description: audit.description,
+        score: audit.score,
+        impact: audit.score < 0.5 ? 'high' : audit.score < 0.9 ? 'medium' : 'low',
+        itemCount: audit.details?.items?.length || 0
+      });
+    }
+  }
+
+  return issues;
 }

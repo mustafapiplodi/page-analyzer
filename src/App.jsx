@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import UrlInput from './components/UrlInput';
 import Results from './components/Results';
+import { Card, CardContent } from '@/components/ui/card';
+import { AlertTriangle } from 'lucide-react';
 import './App.css';
 
 function App() {
@@ -43,13 +45,15 @@ function App() {
       <UrlInput onAnalyze={handleAnalyze} loading={loading} />
 
       {error && (
-        <div className="error-container">
-          <div className="error-icon">⚠️</div>
-          <div>
-            <h3>Error</h3>
-            <p>{error}</p>
-          </div>
-        </div>
+        <Card className="max-w-2xl mx-auto mt-6 border-destructive/50 bg-destructive/10">
+          <CardContent className="flex items-start gap-3 p-4">
+            <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+            <div>
+              <h3 className="font-semibold text-destructive mb-1">Error</h3>
+              <p className="text-sm text-destructive/90">{error}</p>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {results && <Results data={results} />}
