@@ -2,13 +2,10 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { AlertCircle, Loader2, Smartphone, Monitor, ChevronRight } from 'lucide-react';
+import { AlertCircle, Loader2, ChevronRight } from 'lucide-react';
 
 export default function UrlInput({ onAnalyze, loading }) {
   const [url, setUrl] = useState('');
-  const [strategy, setStrategy] = useState('mobile');
   const [error, setError] = useState('');
 
   const validateUrl = (urlString) => {
@@ -20,7 +17,7 @@ export default function UrlInput({ onAnalyze, loading }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -34,7 +31,8 @@ export default function UrlInput({ onAnalyze, loading }) {
       return;
     }
 
-    onAnalyze(url, strategy);
+    // Start with mobile test (most important)
+    onAnalyze(url, 'mobile');
   };
 
   return (
@@ -120,31 +118,6 @@ export default function UrlInput({ onAnalyze, loading }) {
                 </div>
               )}
             </div>
-
-            <div className="space-y-3">
-              <Label>Test Strategy</Label>
-              <RadioGroup
-                value={strategy}
-                onValueChange={setStrategy}
-                disabled={loading}
-                className="flex gap-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="mobile" id="mobile" />
-                  <Label htmlFor="mobile" className="flex items-center gap-2 cursor-pointer font-normal">
-                    <Smartphone className="h-4 w-4" />
-                    Mobile
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="desktop" id="desktop" />
-                  <Label htmlFor="desktop" className="flex items-center gap-2 cursor-pointer font-normal">
-                    <Monitor className="h-4 w-4" />
-                    Desktop
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
           </form>
         </CardContent>
       </Card>
@@ -154,7 +127,8 @@ export default function UrlInput({ onAnalyze, loading }) {
           <CardContent className="flex flex-col items-center py-8">
             <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
             <p className="text-lg font-medium">Analyzing page performance...</p>
-            <p className="text-sm text-muted-foreground mt-2">This may take 10-30 seconds</p>
+            <p className="text-sm text-muted-foreground mt-2">Testing mobile performance (10-30 seconds)</p>
+            <p className="text-xs text-muted-foreground mt-1">Desktop analysis will run automatically after mobile completes</p>
           </CardContent>
         </Card>
       )}

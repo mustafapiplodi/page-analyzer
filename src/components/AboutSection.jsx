@@ -25,33 +25,43 @@ export default function AboutSection() {
   const features = [
     {
       icon: Gauge,
-      title: 'Real-Time Performance Analysis',
-      description: 'Instant website speed test using Google PageSpeed Insights API v5. Get accurate performance scores and Core Web Vitals metrics in seconds.'
+      title: 'Automatic Mobile & Desktop Testing',
+      description: 'Analyzes both mobile and desktop performance automatically. Compare side-by-side scores and get insights on device-specific optimization needs.'
     },
     {
       icon: Target,
-      title: 'Core Web Vitals Monitoring',
-      description: 'Track LCP (Largest Contentful Paint), CLS (Cumulative Layout Shift), FCP, TBT, and Speed Index - essential metrics for Google search rankings.'
+      title: 'Complete Core Web Vitals Analysis',
+      description: 'Track LCP, CLS, FCP, TBT, and Speed Index with interactive tooltips explaining each metric. Visual indicators show good, needs improvement, and poor ratings.'
     },
     {
       icon: Lightbulb,
-      title: 'Smart Recommendations Engine',
-      description: 'AI-powered framework detection (React, Next.js, Vue, Angular) with tailored optimization advice and ready-to-use code snippets.'
+      title: 'Quick Wins Section',
+      description: 'Get top 5 high-impact, easy-to-implement optimizations with code snippets, estimated time to fix, and one-click copy functionality.'
     },
     {
       icon: Eye,
-      title: 'Accessibility + Performance',
-      description: 'Combined scoring system analyzing performance, accessibility, and best practices. Get WCAG compliance insights alongside speed metrics.'
+      title: '4-in-1 Scoring System',
+      description: 'Combined analysis of Performance (40%), Accessibility (25%), SEO (20%), and Best Practices (15%). Comprehensive view of your site health.'
     },
     {
-      icon: Users,
-      title: 'Competitor Analysis',
-      description: 'Compare your website performance against competitors. Identify gaps and opportunities for improvement.'
+      icon: Shield,
+      title: 'Complete SEO Analysis',
+      description: 'Detailed SEO audit with issues grouped by priority. Get specific fix recommendations for meta tags, images, structured data, and more.'
     },
     {
       icon: TrendingUp,
-      title: 'Actionable Optimization Tips',
-      description: 'Priority-ranked recommendations with impact vs effort analysis. Save time and resources by focusing on high-impact improvements.'
+      title: 'Smart Priority Sorting',
+      description: 'Recommendations automatically sorted by priority (high/medium/low) based on impact and implementation effort. Focus on what matters most.'
+    },
+    {
+      icon: Users,
+      title: 'Resource Breakdown',
+      description: 'See exactly where your page weight comes from - JavaScript, CSS, images, fonts. Get optimization tips for each resource type.'
+    },
+    {
+      icon: Zap,
+      title: 'Page Screenshot & PDF Export',
+      description: 'Visual snapshot of your analyzed page with zoom capability. Export professional PDF reports with all scores and recommendations.'
     }
   ];
 
@@ -62,51 +72,57 @@ export default function AboutSection() {
     },
     {
       question: 'What are Core Web Vitals?',
-      answer: 'Core Web Vitals are Google\'s metrics for measuring user experience: LCP (Largest Contentful Paint) measures loading performance, CLS (Cumulative Layout Shift) measures visual stability, and INP (Interaction to Next Paint) measures interactivity. Our tool uses TBT (Total Blocking Time) as a proxy for INP in lab testing.'
+      answer: 'Core Web Vitals are Google\'s metrics for measuring user experience: LCP (Largest Contentful Paint) measures loading performance, CLS (Cumulative Layout Shift) measures visual stability, and INP (Interaction to Next Paint) measures interactivity. Our tool uses TBT (Total Blocking Time) as a proxy for INP in lab testing. Hover over the help icons next to each metric for detailed explanations.'
     },
     {
-      question: 'How often should I test my website performance?',
-      answer: 'Test your website speed regularly, especially after deploying changes, adding new features, or updating content. Monthly performance audits help maintain optimal speed. For high-traffic sites, weekly testing is recommended.'
+      question: 'Why does the tool test both mobile and desktop automatically?',
+      answer: 'Mobile and desktop performance can differ significantly. Since 60-80% of web traffic comes from mobile devices and Google uses mobile-first indexing, both perspectives are important. Our tool automatically tests mobile first (most critical), then desktop, so you can compare performance across devices and identify device-specific optimization opportunities.'
     },
     {
-      question: 'What\'s the difference between mobile and desktop testing?',
-      answer: 'Mobile testing simulates slower networks and less powerful devices, typically showing lower scores. Since Google uses mobile-first indexing, mobile performance is critical for SEO. We recommend optimizing for mobile first, as it often represents 60-80% of web traffic.'
+      question: 'What are "Quick Wins" and how do I use them?',
+      answer: 'Quick Wins are the top 5 highest-impact optimizations that are easiest to implement. Each shows estimated time to fix, potential savings, and includes copy-paste ready code snippets. Start here for the fastest performance improvements with minimal effort.'
+    },
+    {
+      question: 'How is the priority of recommendations determined?',
+      answer: 'Recommendations are automatically prioritized as High, Medium, or Low based on two factors: impact (time/size savings) and implementation effort. High priority items have significant impact and are easy-to-medium difficulty. This helps you focus on optimizations that deliver the best return on investment.'
+    },
+    {
+      question: 'Can I export the results?',
+      answer: 'Yes! Click the "Export PDF" button at the top of your results to download a professional PDF report. The report includes all scores, Core Web Vitals metrics, and top optimization opportunities - perfect for sharing with team members or clients.'
+    },
+    {
+      question: 'What does the Resource Breakdown show?',
+      answer: 'The Resource Breakdown analyzes your page weight by type: JavaScript, CSS, Images, Fonts, Documents, and Other. It shows the size, count, and percentage for each category with specific optimization tips. This helps identify which resource types are bloating your page.'
+    },
+    {
+      question: 'What\'s included in the SEO Analysis?',
+      answer: 'Our SEO Analysis examines 13+ SEO factors including meta tags, image alt text, mobile-friendliness, structured data, and more. Issues are grouped by priority (high/medium/low) with specific fix recommendations for each. The SEO score contributes 20% to your combined score.'
     },
     {
       question: 'How does this tool compare to GTmetrix, Pingdom, or WebPageTest?',
-      answer: 'Our tool uses Google PageSpeed Insights API, the same data Google uses for search rankings. We enhance it with framework detection, smart recommendations, accessibility scoring, and competitor analysis - features not available in basic speed testing tools.'
+      answer: 'Our tool uses Google PageSpeed Insights API - the same data Google uses for search rankings. We enhance it with automatic mobile/desktop testing, framework detection, Quick Wins, resource breakdown, SEO analysis, PDF export, and priority-sorted recommendations. These features go beyond basic speed testing tools.'
     },
     {
-      question: 'Can this tool help improve my Google search rankings?',
-      answer: 'Yes! Page speed and Core Web Vitals are confirmed Google ranking factors. Our tool identifies specific issues affecting your scores and provides actionable recommendations to improve performance, which can positively impact your SEO rankings.'
-    },
-    {
-      question: 'What do the performance scores mean?',
-      answer: 'Scores range from 0-100: 90-100 (Fast/Green) = excellent performance, 50-89 (Moderate/Orange) = needs improvement, 0-49 (Slow/Red) = poor performance requiring immediate attention. These scores are based on Lighthouse metrics.'
-    },
-    {
-      question: 'Why are my lab data and field data different?',
-      answer: 'Lab data comes from controlled Lighthouse testing in simulated environments. Field data (when available) shows real user measurements from Chrome User Experience Report (CrUX) over 28 days. Field data is more accurate for real-world performance but requires sufficient traffic.'
-    },
-    {
-      question: 'Do I need technical knowledge to use this tool?',
-      answer: 'No! Our tool is designed for everyone - developers, marketers, business owners, and SEO professionals. Results are easy to understand with color-coded scores, plain English explanations, and prioritized action items.'
+      question: 'What if the analysis fails or times out?',
+      answer: 'Our tool includes automatic retry logic with exponential backoff (up to 3 attempts). If a request fails due to network issues, rate limiting, or server errors, it will automatically retry with increasing delays (2s, 4s, 8s). You\'ll see the retry progress in the error message.'
     },
     {
       question: 'Is this tool free to use?',
-      answer: 'Yes, our website performance analyzer is completely free. Test unlimited URLs without registration. We believe everyone deserves access to professional-grade performance testing tools.'
+      answer: 'Yes! Our website performance analyzer is completely free with unlimited tests. No registration required. Test as many URLs as you need, export PDFs, and access all features at no cost.'
     }
   ];
 
   const keywords = [
     'Page Speed Test',
     'Core Web Vitals',
-    'Website Performance',
-    'SEO Optimization',
-    'Lighthouse Testing',
-    'Mobile Speed',
-    'Site Speed Checker',
-    'Performance Analyzer'
+    'Mobile Performance',
+    'Desktop Performance',
+    'SEO Analysis',
+    'PDF Export',
+    'Quick Wins',
+    'Resource Breakdown',
+    'Performance Analyzer',
+    'Lighthouse Testing'
   ];
 
   return (
@@ -126,17 +142,17 @@ export default function AboutSection() {
           <div className="prose prose-sm max-w-none">
             <p className="text-muted-foreground leading-relaxed">
               Welcome to the most comprehensive <strong>free website speed test tool</strong> available online. Our advanced
-              <strong> performance analyzer</strong> helps you measure, monitor, and optimize your website's loading speed
-              using Google's official PageSpeed Insights API. Whether you're a developer, SEO professional, or business owner,
-              our tool provides actionable insights to improve your <strong>Core Web Vitals</strong>, boost search engine rankings,
-              and enhance user experience.
+              <strong> performance analyzer</strong> automatically tests both mobile and desktop performance, providing a complete
+              view of your site's speed using Google's official PageSpeed Insights API. Whether you're a developer, SEO professional,
+              or business owner, get actionable insights to improve your <strong>Core Web Vitals</strong>, boost search engine rankings,
+              and enhance user experience with features like Quick Wins, SEO analysis, and PDF export.
             </p>
             <p className="text-muted-foreground leading-relaxed">
               In today's digital landscape, <strong>website performance</strong> is critical for success. Studies show that a
               1-second delay in page load time can reduce conversions by 7% and increase bounce rates significantly. Google
               has made page speed a ranking factor, making regular <strong>performance testing</strong> essential for maintaining
-              competitive search visibility. Our tool goes beyond basic speed tests by offering framework-specific recommendations,
-              accessibility scoring, and competitor analysis.
+              competitive search visibility. Our tool goes beyond basic speed tests with automatic mobile/desktop comparison,
+              priority-sorted recommendations, resource breakdown analysis, complete SEO audits, and professional PDF reports.
             </p>
           </div>
 

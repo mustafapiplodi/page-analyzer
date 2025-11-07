@@ -70,6 +70,13 @@ function App() {
       // Store results by strategy for comparison
       if (strategy === 'mobile') {
         setMobileResults(data);
+        // Automatically start desktop test after mobile completes
+        // Only if this is the first mobile test (not a retry from comparison view)
+        if (retryCount === 0) {
+          setTimeout(() => {
+            handleAnalyze(url, 'desktop');
+          }, 500);
+        }
       } else {
         setDesktopResults(data);
       }
