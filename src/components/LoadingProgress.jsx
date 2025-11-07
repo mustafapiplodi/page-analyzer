@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle2, Smartphone, Monitor, Clock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export default function LoadingProgress() {
   const [progress, setProgress] = useState(0);
   const [stage, setStage] = useState('Initializing...');
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [mobileStatus, setMobileStatus] = useState('in-progress'); // 'in-progress' | 'complete'
+  const [desktopStatus, setDesktopStatus] = useState('waiting'); // 'waiting' | 'in-progress' | 'complete'
 
   useEffect(() => {
     const startTime = Date.now();
@@ -15,29 +18,54 @@ export default function LoadingProgress() {
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
       setTimeElapsed(elapsed);
 
-      // Progress stages based on typical API response time
+      // Progress stages - Mobile first (0-50%), then Desktop (50-100%)
       if (elapsed < 5) {
-        setProgress(Math.min((elapsed / 5) * 15, 15));
-        setStage('Connecting to Google PageSpeed API...');
-      } else if (elapsed < 10) {
-        setProgress(15 + Math.min(((elapsed - 5) / 5) * 20, 20));
-        setStage('Analyzing page performance...');
+        setProgress(Math.min((elapsed / 5) * 10, 10));
+        setStage('Testing Mobile: Connecting to PageSpeed API...');
+        setMobileStatus('in-progress');
+        setDesktopStatus('waiting');
+      } else if (elapsed < 12) {
+        setProgress(10 + Math.min(((elapsed - 5) / 7) * 20, 20));
+        setStage('Testing Mobile: Analyzing performance...');
+        setMobileStatus('in-progress');
+        setDesktopStatus('waiting');
       } else if (elapsed < 20) {
-        setProgress(35 + Math.min(((elapsed - 10) / 10) * 35, 35));
-        setStage('Checking accessibility and best practices...');
+        setProgress(30 + Math.min(((elapsed - 12) / 8) * 15, 15));
+        setStage('Testing Mobile: Checking accessibility...');
+        setMobileStatus('in-progress');
+        setDesktopStatus('waiting');
       } else if (elapsed < 25) {
-        setProgress(70 + Math.min(((elapsed - 20) / 5) * 15, 15));
-        setStage('Generating recommendations...');
+        setProgress(45 + Math.min(((elapsed - 20) / 5) * 5, 5));
+        setStage('Mobile test complete! Starting desktop test...');
+        setMobileStatus('complete');
+        setDesktopStatus('waiting');
+      } else if (elapsed < 30) {
+        setProgress(50 + Math.min(((elapsed - 25) / 5) * 10, 10));
+        setStage('Testing Desktop: Connecting to PageSpeed API...');
+        setMobileStatus('complete');
+        setDesktopStatus('in-progress');
+      } else if (elapsed < 40) {
+        setProgress(60 + Math.min(((elapsed - 30) / 10) * 20, 20));
+        setStage('Testing Desktop: Analyzing performance...');
+        setMobileStatus('complete');
+        setDesktopStatus('in-progress');
+      } else if (elapsed < 50) {
+        setProgress(80 + Math.min(((elapsed - 40) / 10) * 10, 10));
+        setStage('Testing Desktop: Checking accessibility...');
+        setMobileStatus('complete');
+        setDesktopStatus('in-progress');
       } else {
-        setProgress(85 + Math.min(((elapsed - 25) / 5) * 10, 10));
-        setStage('Finalizing report...');
+        setProgress(90 + Math.min(((elapsed - 50) / 10) * 10, 10));
+        setStage('Finalizing desktop report...');
+        setMobileStatus('complete');
+        setDesktopStatus('in-progress');
       }
     }, 100);
 
     return () => clearInterval(timer);
   }, []);
 
-  const estimatedTimeRemaining = Math.max(0, 29 - timeElapsed);
+  const estimatedTimeRemaining = Math.max(0, 60 - timeElapsed);
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
@@ -45,8 +73,62 @@ export default function LoadingProgress() {
         <CardContent className="pt-6">
           <div className="text-center mb-6">
             <Loader2 className="h-16 w-16 mx-auto mb-4 text-primary animate-spin" />
-            <h3 className="text-2xl font-bold mb-2">Analyzing page performance...</h3>
-            <p className="text-muted-foreground">This may take 10-30 seconds</p>
+            <h3 className="text-2xl font-bold mb-2">Analyzing Mobile & Desktop Performance</h3>
+            <p className="text-muted-foreground">Testing both platforms (30-60 seconds total)</p>
+          </div>
+
+          {/* Device Status Indicators */}
+          <div className="flex gap-4 justify-center mb-6">
+            {/* Mobile Status */}
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+              mobileStatus === 'in-progress'
+                ? 'bg-primary/10 border-primary/30'
+                : mobileStatus === 'complete'
+                ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
+                : 'bg-background'
+            }`}>
+              <Smartphone className={`h-4 w-4 ${
+                mobileStatus === 'in-progress'
+                  ? 'text-primary'
+                  : mobileStatus === 'complete'
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-muted-foreground'
+              }`} />
+              <span className="text-sm font-medium">Mobile</span>
+              {mobileStatus === 'in-progress' && (
+                <Loader2 className="h-3 w-3 animate-spin text-primary" />
+              )}
+              {mobileStatus === 'complete' && (
+                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+              )}
+            </div>
+
+            {/* Desktop Status */}
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+              desktopStatus === 'in-progress'
+                ? 'bg-primary/10 border-primary/30'
+                : desktopStatus === 'complete'
+                ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
+                : 'bg-background'
+            }`}>
+              <Monitor className={`h-4 w-4 ${
+                desktopStatus === 'in-progress'
+                  ? 'text-primary'
+                  : desktopStatus === 'complete'
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-muted-foreground'
+              }`} />
+              <span className="text-sm font-medium">Desktop</span>
+              {desktopStatus === 'waiting' && (
+                <Badge variant="outline" className="text-xs">Waiting</Badge>
+              )}
+              {desktopStatus === 'in-progress' && (
+                <Loader2 className="h-3 w-3 animate-spin text-primary" />
+              )}
+              {desktopStatus === 'complete' && (
+                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+              )}
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -59,13 +141,16 @@ export default function LoadingProgress() {
             </div>
 
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>Time elapsed: {timeElapsed}s</span>
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                <span>Time elapsed: {timeElapsed}s</span>
+              </div>
               <span>Est. remaining: ~{estimatedTimeRemaining}s</span>
             </div>
 
             <div className="mt-4 p-3 bg-muted/50 rounded-lg">
               <p className="text-xs text-muted-foreground text-center">
-                We're running comprehensive tests including performance, accessibility, and best practices analysis.
+                Running comprehensive tests on both mobile and desktop including performance, accessibility, SEO, and best practices analysis.
               </p>
             </div>
           </div>
