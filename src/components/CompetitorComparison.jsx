@@ -157,13 +157,13 @@ export default function CompetitorComparison({ mobileResults, desktopResults, on
           <div className="space-y-4">
             {/* Current Site - Show both Mobile and Desktop */}
             <div className="p-4 border-2 border-primary rounded-lg bg-primary/5">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Badge variant="good">Your Site</Badge>
-                  <span className="font-medium text-sm">{mobileResults?.url}</span>
+                  <span className="font-medium text-sm break-all">{mobileResults?.url}</span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid sm:grid-cols-2 gap-3">
                 {/* Mobile Score */}
                 <div className="bg-background/50 p-3 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
@@ -173,7 +173,7 @@ export default function CompetitorComparison({ mobileResults, desktopResults, on
                   <div className="text-2xl font-bold">
                     {mobileResults?.performanceScore}
                   </div>
-                  <div className="grid grid-cols-3 gap-1 text-xs mt-2">
+                  <div className="grid grid-cols-3 gap-1 text-xs mt-2 min-w-0">
                     <div>
                       <div className="text-muted-foreground">LCP</div>
                       <div className="font-semibold">{mobileResults?.metrics?.lcp?.displayValue}</div>
@@ -197,18 +197,18 @@ export default function CompetitorComparison({ mobileResults, desktopResults, on
                   <div className="text-2xl font-bold">
                     {desktopResults?.performanceScore}
                   </div>
-                  <div className="grid grid-cols-3 gap-1 text-xs mt-2">
-                    <div>
-                      <div className="text-muted-foreground">LCP</div>
-                      <div className="font-semibold">{desktopResults?.metrics?.lcp?.displayValue}</div>
+                  <div className="grid grid-cols-3 gap-1 text-xs mt-2 min-w-0">
+                    <div className="min-w-0">
+                      <div className="text-muted-foreground truncate">LCP</div>
+                      <div className="font-semibold truncate">{desktopResults?.metrics?.lcp?.displayValue}</div>
                     </div>
-                    <div>
-                      <div className="text-muted-foreground">CLS</div>
-                      <div className="font-semibold">{desktopResults?.metrics?.cls?.displayValue}</div>
+                    <div className="min-w-0">
+                      <div className="text-muted-foreground truncate">CLS</div>
+                      <div className="font-semibold truncate">{desktopResults?.metrics?.cls?.displayValue}</div>
                     </div>
-                    <div>
-                      <div className="text-muted-foreground">TBT</div>
-                      <div className="font-semibold">{desktopResults?.metrics?.tbt?.displayValue}</div>
+                    <div className="min-w-0">
+                      <div className="text-muted-foreground truncate">TBT</div>
+                      <div className="font-semibold truncate">{desktopResults?.metrics?.tbt?.displayValue}</div>
                     </div>
                   </div>
                 </div>
@@ -321,7 +321,7 @@ export default function CompetitorComparison({ mobileResults, desktopResults, on
                         </div>
 
                         {/* Quick preview - Mobile and Desktop scores */}
-                        <div className="grid grid-cols-2 gap-3 mb-2">
+                        <div className="grid sm:grid-cols-2 gap-3 mb-2">
                           <div className="bg-background/50 p-2 rounded">
                             <div className="flex items-center gap-1 mb-1">
                               <Smartphone className="h-3 w-3 text-muted-foreground" />
