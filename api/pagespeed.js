@@ -157,8 +157,11 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Error analyzing page speed:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error message:', error.message);
     return res.status(500).json({
-      error: 'An unexpected error occurred. Please try again.'
+      error: 'An unexpected error occurred. Please try again.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 }
