@@ -106,7 +106,12 @@ function App() {
       <div className="app-content">
         <UrlInput onAnalyze={handleAnalyze} loading={loading} />
 
-        {loading && <LoadingProgress />}
+        {loading && (
+          <LoadingProgress
+            mobileComplete={!!mobileResults}
+            desktopComplete={!!desktopResults}
+          />
+        )}
 
         {error && (
           <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">

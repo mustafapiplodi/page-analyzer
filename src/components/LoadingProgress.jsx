@@ -4,12 +4,14 @@ import { Progress } from '@/components/ui/progress';
 import { Loader2, CheckCircle2, Smartphone, Monitor, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-export default function LoadingProgress() {
+export default function LoadingProgress({ mobileComplete = false, desktopComplete = false }) {
   const [progress, setProgress] = useState(0);
   const [stage, setStage] = useState('Initializing...');
   const [timeElapsed, setTimeElapsed] = useState(0);
-  const [mobileStatus, setMobileStatus] = useState('in-progress'); // 'in-progress' | 'complete'
-  const [desktopStatus, setDesktopStatus] = useState('waiting'); // 'waiting' | 'in-progress' | 'complete'
+
+  // Derive status from props
+  const mobileStatus = mobileComplete ? 'complete' : 'in-progress';
+  const desktopStatus = desktopComplete ? 'complete' : mobileComplete ? 'in-progress' : 'waiting';
 
   useEffect(() => {
     const startTime = Date.now();
@@ -19,51 +21,41 @@ export default function LoadingProgress() {
       setTimeElapsed(elapsed);
 
       // Progress stages - Mobile first (0-50%), then Desktop (50-100%)
-      if (elapsed < 5) {
-        setProgress(Math.min((elapsed / 5) * 10, 10));
-        setStage('Testing Mobile: Connecting to PageSpeed API...');
-        setMobileStatus('in-progress');
-        setDesktopStatus('waiting');
-      } else if (elapsed < 12) {
-        setProgress(10 + Math.min(((elapsed - 5) / 7) * 20, 20));
-        setStage('Testing Mobile: Analyzing performance...');
-        setMobileStatus('in-progress');
-        setDesktopStatus('waiting');
-      } else if (elapsed < 20) {
-        setProgress(30 + Math.min(((elapsed - 12) / 8) * 15, 15));
-        setStage('Testing Mobile: Checking accessibility...');
-        setMobileStatus('in-progress');
-        setDesktopStatus('waiting');
-      } else if (elapsed < 25) {
-        setProgress(45 + Math.min(((elapsed - 20) / 5) * 5, 5));
-        setStage('Mobile test complete! Starting desktop test...');
-        setMobileStatus('complete');
-        setDesktopStatus('waiting');
-      } else if (elapsed < 30) {
-        setProgress(50 + Math.min(((elapsed - 25) / 5) * 10, 10));
-        setStage('Testing Desktop: Connecting to PageSpeed API...');
-        setMobileStatus('complete');
-        setDesktopStatus('in-progress');
-      } else if (elapsed < 40) {
-        setProgress(60 + Math.min(((elapsed - 30) / 10) * 20, 20));
-        setStage('Testing Desktop: Analyzing performance...');
-        setMobileStatus('complete');
-        setDesktopStatus('in-progress');
-      } else if (elapsed < 50) {
-        setProgress(80 + Math.min(((elapsed - 40) / 10) * 10, 10));
-        setStage('Testing Desktop: Checking accessibility...');
-        setMobileStatus('complete');
-        setDesktopStatus('in-progress');
-      } else {
-        setProgress(90 + Math.min(((elapsed - 50) / 10) * 10, 10));
-        setStage('Finalizing desktop report...');
-        setMobileStatus('complete');
-        setDesktopStatus('in-progress');
+      if (!mobileComplete) {
+        // Mobile testing phase
+        if (elapsed < 5) {
+          setProgress(Math.min((elapsed / 5) * 10, 10));
+          setStage('Testing Mobile: Connecting to PageSpeed API...');
+        } else if (elapsed < 12) {
+          setProgress(10 + Math.min(((elapsed - 5) / 7) * 20, 20));
+          setStage('Testing Mobile: Analyzing performance...');
+        } else if (elapsed < 20) {
+          setProgress(30 + Math.min(((elapsed - 12) / 8) * 15, 15));
+          setStage('Testing Mobile: Checking accessibility...');
+        } else {
+          setProgress(45 + Math.min(((elapsed - 20) / 5) * 5, 5));
+          setStage('Testing Mobile: Finalizing results...');
+        }
+      } else if (!desktopComplete) {
+        // Desktop testing phase
+        if (elapsed < 5) {
+          setProgress(50 + Math.min((elapsed / 5) * 10, 10));
+          setStage('Testing Desktop: Connecting to PageSpeed API...');
+        } else if (elapsed < 12) {
+          setProgress(60 + Math.min(((elapsed - 5) / 7) * 20, 20));
+          setStage('Testing Desktop: Analyzing performance...');
+        } else if (elapsed < 20) {
+          setProgress(80 + Math.min(((elapsed - 12) / 8) * 10, 10));
+          setStage('Testing Desktop: Checking accessibility...');
+        } else {
+          setProgress(90 + Math.min(((elapsed - 20) / 5) * 10, 10));
+          setStage('Finalizing desktop report...');
+        }
       }
     }, 100);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [mobileComplete, desktopComplete]);
 
   const estimatedTimeRemaining = Math.max(0, 60 - timeElapsed);
 
