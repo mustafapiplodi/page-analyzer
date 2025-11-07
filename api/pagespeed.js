@@ -56,7 +56,7 @@ export default async function handler(req, res) {
 
     // Make request to PageSpeed API with timeout handling
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 29000); // 29 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 29500); // 29.5 second timeout
 
     const response = await fetch(apiUrl.toString(), {
       signal: controller.signal
