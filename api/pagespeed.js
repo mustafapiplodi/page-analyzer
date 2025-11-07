@@ -105,13 +105,13 @@ export default async function handler(req, res) {
       timestamp: Date.now(),
 
       // Performance score
-      performanceScore: Math.round(categories.performance.score * 100),
+      performanceScore: Math.round((categories.performance?.score || 0) * 100),
 
       // Accessibility score
-      accessibilityScore: Math.round(categories.accessibility.score * 100),
+      accessibilityScore: Math.round((categories.accessibility?.score || 0) * 100),
 
       // Best practices score
-      bestPracticesScore: Math.round(categories['best-practices'].score * 100),
+      bestPracticesScore: Math.round((categories['best-practices']?.score || 0) * 100),
 
       // Detected stack/framework
       detectedStack: detectedStack,

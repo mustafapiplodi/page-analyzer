@@ -32,7 +32,7 @@ export default function CompetitorComparison({ currentSite, onAnalyze }) {
     try {
       // Fetch data directly without updating main page
       const apiUrl = import.meta.env.DEV
-        ? 'https://page-speed-analyzer-llgi3t1iu-mustafapiplodis-projects.vercel.app/api/pagespeed'
+        ? 'https://page-speed-analyzer-fwrormzjc-mustafapiplodis-projects.vercel.app/api/pagespeed'
         : '/api/pagespeed';
 
       const response = await fetch(apiUrl, {
@@ -120,8 +120,11 @@ export default function CompetitorComparison({ currentSite, onAnalyze }) {
                   <Badge variant="good">Your Site</Badge>
                   <span className="font-medium">{currentSite?.url}</span>
                 </div>
-                <div className="text-2xl font-bold">
-                  {currentSite?.performanceScore}
+                <div className="text-center">
+                  <div className="text-2xl font-bold">
+                    {currentSite?.performanceScore}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Performance Score</div>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2 text-sm">
