@@ -11,12 +11,13 @@ import './App.css';
 function App() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
+  const [mobileResults, setMobileResults] = useState(null);
+  const [desktopResults, setDesktopResults] = useState(null);
   const [error, setError] = useState(null);
 
   const handleAnalyze = async (url, strategy) => {
     setLoading(true);
     setError(null);
-    setResults(null);
 
     try {
       // Use production API if in development mode, otherwise use local endpoint
@@ -40,6 +41,13 @@ function App() {
       }
 
       setResults(data);
+
+      // Store results by strategy for comparison
+      if (strategy === 'mobile') {
+        setMobileResults(data);
+      } else {
+        setDesktopResults(data);
+      }
     } catch (err) {
       setError(err.message || 'An unexpected error occurred. Please try again.');
       console.error('Error analyzing page:', err);
@@ -71,7 +79,14 @@ function App() {
           </div>
         )}
 
-        {results && <Results data={results} onAnalyze={handleAnalyze} />}
+        {results && (
+          <Results
+            data={results}
+            onAnalyze={handleAnalyze}
+            mobileResults={mobileResults}
+            desktopResults={desktopResults}
+          />
+        )}
 
         {/* Show About section when no results */}
         {!results && !loading && <AboutSection />}

@@ -161,6 +161,9 @@ export default async function handler(req, res) {
       // Accessibility issues
       accessibilityIssues: extractAccessibilityIssues(audits),
 
+      // SEO issues
+      seoIssues: extractSEOIssues(audits),
+
       // Resource breakdown
       resourceBreakdown: extractResourceBreakdown(audits),
 
@@ -445,6 +448,45 @@ function extractAccessibilityIssues(audits) {
   ];
 
   for (const auditId of a11yAudits) {
+    const audit = audits[auditId];
+    if (audit && audit.score !== null && audit.score < 1) {
+      issues.push({
+        id: auditId,
+        title: audit.title,
+        description: audit.description,
+        score: audit.score,
+        impact: audit.score < 0.5 ? 'high' : audit.score < 0.9 ? 'medium' : 'low',
+        itemCount: audit.details?.items?.length || 0
+      });
+    }
+  }
+
+  return issues;
+}
+
+/**
+ * Extract SEO issues
+ */
+function extractSEOIssues(audits) {
+  const issues = [];
+
+  const seoAudits = [
+    'document-title',
+    'meta-description',
+    'link-text',
+    'crawlable-anchors',
+    'is-crawlable',
+    'robots-txt',
+    'image-alt',
+    'hreflang',
+    'canonical',
+    'viewport',
+    'font-size',
+    'tap-targets',
+    'structured-data'
+  ];
+
+  for (const auditId of seoAudits) {
     const audit = audits[auditId];
     if (audit && audit.score !== null && audit.score < 1) {
       issues.push({

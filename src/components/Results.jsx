@@ -7,19 +7,25 @@ import CompetitorComparison from './CompetitorComparison';
 import Screenshot from './Screenshot';
 import QuickWins from './QuickWins';
 import ResourceBreakdown from './ResourceBreakdown';
+import SEOAnalysis from './SEOAnalysis';
+import ExportPDF from './ExportPDF';
+import MobileDesktopComparison from './MobileDesktopComparison';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Info } from 'lucide-react';
 
-export default function Results({ data, onAnalyze }) {
+export default function Results({ data, onAnalyze, mobileResults, desktopResults }) {
   if (!data) return null;
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <Card className="mt-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
         <CardContent className="pt-6">
-          <h2 className="text-2xl font-bold mb-4">Analysis Results</h2>
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <h2 className="text-2xl font-bold">Analysis Results</h2>
+            <ExportPDF data={data} />
+          </div>
           <div className="space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <span className="text-sm font-medium text-muted-foreground">Analyzed URL:</span>
@@ -70,6 +76,9 @@ export default function Results({ data, onAnalyze }) {
       {/* Resource Breakdown */}
       <ResourceBreakdown breakdown={data.resourceBreakdown} />
 
+      {/* SEO Analysis */}
+      <SEOAnalysis seoScore={data.seoScore} seoIssues={data.seoIssues} />
+
       {/* Smart Recommendations with Framework Detection */}
       {data.detectedStack && data.opportunities && data.opportunities.length > 0 ? (
         <SmartRecommendations
@@ -81,6 +90,14 @@ export default function Results({ data, onAnalyze }) {
           <Opportunities opportunities={data.opportunities} />
         )
       )}
+
+      {/* Mobile vs Desktop Comparison */}
+      <MobileDesktopComparison
+        mobileResults={mobileResults}
+        desktopResults={desktopResults}
+        onAnalyze={onAnalyze}
+        currentUrl={data.url}
+      />
 
       {/* Competitor Comparison */}
       <CompetitorComparison
