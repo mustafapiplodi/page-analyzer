@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { AlertCircle, Loader2, Smartphone, Monitor } from 'lucide-react';
+import { AlertCircle, Loader2, Smartphone, Monitor, ChevronRight } from 'lucide-react';
 
 export default function UrlInput({ onAnalyze, loading }) {
   const [url, setUrl] = useState('');
@@ -38,12 +38,49 @@ export default function UrlInput({ onAnalyze, loading }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Breadcrumbs */}
+      <nav className="mb-6" aria-label="Breadcrumb">
+        <ol className="flex items-center gap-2 text-sm">
+          <li>
+            <a
+              href="https://www.scalinghigh.com"
+              className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Home
+            </a>
+          </li>
+          <li>
+            <ChevronRight className="h-4 w-4 text-slate-400" />
+          </li>
+          <li>
+            <a
+              href="https://www.scalinghigh.com/tools"
+              className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Tools
+            </a>
+          </li>
+          <li>
+            <ChevronRight className="h-4 w-4 text-slate-400" />
+          </li>
+          <li>
+            <span className="font-medium text-slate-900 dark:text-white">Speed Analyzer</span>
+          </li>
+        </ol>
+      </nav>
+
+      <div className="max-w-4xl mx-auto">
+
       <div className="text-center mb-8">
-        <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 drop-shadow-lg">
+        <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4">
           Website Speed Test
         </h1>
-        <p className="text-lg text-white/90 max-w-2xl mx-auto">
+        <p className="text-lg text-slate-700 dark:text-slate-300 max-w-2xl mx-auto">
           Analyze your website performance and get actionable insights based on Google's Core Web Vitals
         </p>
       </div>
@@ -121,6 +158,7 @@ export default function UrlInput({ onAnalyze, loading }) {
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   );
 }

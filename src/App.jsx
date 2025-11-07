@@ -18,8 +18,13 @@ function App() {
     setResults(null);
 
     try {
+      // Use production API if in development mode, otherwise use local endpoint
+      const apiUrl = import.meta.env.DEV
+        ? 'https://page-speed-analyzer-fwrormzjc-mustafapiplodis-projects.vercel.app/api/pagespeed'
+        : '/api/pagespeed';
+
       // Call our serverless API endpoint
-      const response = await fetch('/api/pagespeed', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,16 +75,18 @@ function App() {
       </div>
 
       <footer className="app-footer">
-        <div className="space-y-3">
-          <p>
-            Powered by <a href="https://developers.google.com/speed/docs/insights/v5/get-started" target="_blank" rel="noopener noreferrer">Google PageSpeed Insights API v5</a>
-          </p>
-          <p className="footer-note">
-            Analyze your website's performance based on Google's Core Web Vitals standards
-          </p>
-          <div className="pt-2 border-t border-white/20 mt-4">
-            <p className="text-sm">
-              Powered by <a href="https://www.scalinghigh.com" target="_blank" rel="noopener noreferrer" className="font-semibold hover:opacity-80 transition-opacity">Scaling High Technologies</a>
+        <div className="max-w-4xl mx-auto space-y-4 text-center">
+          <div className="space-y-3">
+            <p className="text-lg font-medium">
+              Powered by <a href="https://developers.google.com/speed/docs/insights/v5/get-started" target="_blank" rel="noopener noreferrer">Google PageSpeed Insights API v5</a>
+            </p>
+            <p className="footer-note max-w-2xl mx-auto">
+              Analyze your website's performance based on Google's Core Web Vitals standards
+            </p>
+          </div>
+          <div className="pt-4 border-t border-white/30 mt-6 mx-auto max-w-md">
+            <p className="text-base">
+              Built with excellence by <a href="https://www.scalinghigh.com" target="_blank" rel="noopener noreferrer" className="font-bold">Scaling High Technologies</a>
             </p>
           </div>
         </div>

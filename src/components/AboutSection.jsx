@@ -213,13 +213,13 @@ export default function AboutSection() {
       </Card>
 
       {/* Disclaimer */}
-      <Card className="border-warning/50 bg-warning/5">
+      <Card className="border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-700">
         <CardContent className="pt-6">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
             <div className="space-y-2">
-              <h3 className="font-semibold text-sm">Disclaimer</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <h3 className="font-semibold text-base text-amber-900 dark:text-amber-100">Disclaimer</h3>
+              <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
                 This tool provides performance analysis based on Google PageSpeed Insights API and Lighthouse metrics.
                 Results represent lab data from simulated testing environments and may differ from real-world performance.
                 Scores and recommendations are for informational purposes only. Actual performance can vary based on user
