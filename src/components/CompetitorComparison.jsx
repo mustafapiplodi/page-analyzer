@@ -32,7 +32,7 @@ export default function CompetitorComparison({ currentSite, onAnalyze }) {
     try {
       // Fetch data directly without updating main page
       const apiUrl = import.meta.env.DEV
-        ? 'https://page-speed-analyzer-fwrormzjc-mustafapiplodis-projects.vercel.app/api/pagespeed'
+        ? 'https://page-speed-analyzer-c5rm75v2q-mustafapiplodis-projects.vercel.app/api/pagespeed'
         : '/api/pagespeed';
 
       const response = await fetch(apiUrl, {

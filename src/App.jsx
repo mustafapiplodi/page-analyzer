@@ -20,7 +20,7 @@ function App() {
     try {
       // Use production API if in development mode, otherwise use local endpoint
       const apiUrl = import.meta.env.DEV
-        ? 'https://page-speed-analyzer-fwrormzjc-mustafapiplodis-projects.vercel.app/api/pagespeed'
+        ? 'https://page-speed-analyzer-c5rm75v2q-mustafapiplodis-projects.vercel.app/api/pagespeed'
         : '/api/pagespeed';
 
       // Call our serverless API endpoint
