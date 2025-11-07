@@ -167,6 +167,15 @@ export default async function handler(req, res) {
     console.error('Error analyzing page speed:', error);
     console.error('Error stack:', error.stack);
     console.error('Error message:', error.message);
+
+    // Handle timeout errors specifically
+    if (error.name === 'AbortError' || error.message.includes('aborted')) {
+      return res.status(504).json({
+        error: 'Analysis timed out. This website is taking too long to analyze. Please try again or test a different URL.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+
     return res.status(500).json({
       error: 'An unexpected error occurred. Please try again.',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
