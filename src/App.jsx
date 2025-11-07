@@ -3,6 +3,7 @@ import UrlInput from './components/UrlInput';
 import Results from './components/Results';
 import AboutSection from './components/AboutSection';
 import Header from './components/Header';
+import LoadingProgress from './components/LoadingProgress';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 import './App.css';
@@ -53,6 +54,8 @@ function App() {
 
       <div className="app-content">
         <UrlInput onAnalyze={handleAnalyze} loading={loading} />
+
+        {loading && <LoadingProgress />}
 
         {error && (
           <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">

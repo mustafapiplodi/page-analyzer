@@ -48,6 +48,7 @@ export default async function handler(req, res) {
     apiUrl.searchParams.append('category', 'performance');
     apiUrl.searchParams.append('category', 'accessibility');
     apiUrl.searchParams.append('category', 'best-practices');
+    apiUrl.searchParams.append('category', 'seo');
 
     // Add API key if available
     if (process.env.PAGESPEED_API_KEY) {
@@ -112,6 +113,9 @@ export default async function handler(req, res) {
 
       // Best practices score
       bestPracticesScore: Math.round((categories['best-practices']?.score || 0) * 100),
+
+      // SEO score
+      seoScore: Math.round((categories.seo?.score || 0) * 100),
 
       // Detected stack/framework
       detectedStack: detectedStack,
