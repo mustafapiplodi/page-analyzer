@@ -15,9 +15,12 @@ function App() {
   const [desktopResults, setDesktopResults] = useState(null);
   const [error, setError] = useState(null);
 
-  const handleAnalyze = async (url, strategy) => {
+  const handleAnalyze = async (url, strategy, retryCount = 0) => {
     setLoading(true);
     setError(null);
+
+    const maxRetries = 3;
+    const retryDelay = (attempt) => Math.min(1000 * Math.pow(2, attempt), 8000); // Exponential backoff: 2s, 4s, 8s
 
     try {
       // Use production API if in development mode, otherwise use local endpoint
@@ -36,6 +39,28 @@ function App() {
 
       const data = await response.json();
 
+      // Handle rate limiting with retry
+      if (response.status === 429) {
+        if (retryCount < maxRetries) {
+          const delay = retryDelay(retryCount);
+          setError(`Rate limit reached. Retrying in ${delay / 1000} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return handleAnalyze(url, strategy, retryCount + 1);
+        }
+        throw new Error(data.error || 'Rate limit exceeded. Please try again later.');
+      }
+
+      // Handle server errors with retry
+      if (response.status >= 500 && response.status < 600) {
+        if (retryCount < maxRetries) {
+          const delay = retryDelay(retryCount);
+          setError(`Server error. Retrying in ${delay / 1000} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return handleAnalyze(url, strategy, retryCount + 1);
+        }
+        throw new Error('Server is experiencing issues. Please try again later.');
+      }
+
       if (!response.ok) {
         throw new Error(data.error || 'Failed to analyze page');
       }
@@ -49,7 +74,18 @@ function App() {
         setDesktopResults(data);
       }
     } catch (err) {
-      setError(err.message || 'An unexpected error occurred. Please try again.');
+      // Network errors - retry
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        if (retryCount < maxRetries) {
+          const delay = retryDelay(retryCount);
+          setError(`Network error. Retrying in ${delay / 1000} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return handleAnalyze(url, strategy, retryCount + 1);
+        }
+        setError('Network connection failed. Please check your internet connection and try again.');
+      } else {
+        setError(err.message || 'An unexpected error occurred. Please try again.');
+      }
       console.error('Error analyzing page:', err);
     } finally {
       setLoading(false);
