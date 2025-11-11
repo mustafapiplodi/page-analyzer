@@ -34,7 +34,7 @@ export default function CompetitorComparison({ mobileResults, desktopResults, on
 
     try {
       const apiUrl = import.meta.env.DEV
-        ? 'https://page-speed-analyzer.vercel.app/api/pagespeed'
+        ? 'https://pagespeed.scalinghigh.com/api/pagespeed'
         : '/api/pagespeed';
 
       // Test mobile first

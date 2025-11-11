@@ -25,7 +25,7 @@ function App() {
     try {
       // Use production API if in development mode, otherwise use local endpoint
       const apiUrl = import.meta.env.DEV
-        ? 'https://page-speed-analyzer.vercel.app/api/pagespeed'
+        ? 'https://pagespeed.scalinghigh.com/api/pagespeed'
         : '/api/pagespeed';
 
       // Call our serverless API endpoint
@@ -150,9 +150,12 @@ function App() {
               Analyze your website's performance based on Google's Core Web Vitals standards
             </p>
           </div>
-          <div className="pt-4 border-t border-white/30 mt-6 mx-auto max-w-md">
+          <div className="pt-4 border-t border-white/30 mt-6 mx-auto max-w-md space-y-2">
             <p className="text-base">
               Built with excellence by <a href="https://www.scalinghigh.com" target="_blank" rel="noopener noreferrer" className="font-bold">Scaling High Technologies</a>
+            </p>
+            <p className="text-sm">
+              Need SEO, Web Development, or Graphic Design? <a href="https://www.scalinghigh.com/contact" target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline">Get in touch</a>
             </p>
           </div>
         </div>

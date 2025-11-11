@@ -7,7 +7,7 @@ A comprehensive, production-ready website performance analyzer built with React 
 ![Vite](https://img.shields.io/badge/Vite-5+-purple)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-**Live Demo:** [https://page-speed-analyzer.vercel.app](https://page-speed-analyzer.vercel.app)
+**Live Demo:** [https://pagespeed.scalinghigh.com](https://pagespeed.scalinghigh.com)
 
 ---
 

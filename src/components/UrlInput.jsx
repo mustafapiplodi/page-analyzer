@@ -54,19 +54,6 @@ export default function UrlInput({ onAnalyze, loading }) {
             <ChevronRight className="h-4 w-4 text-slate-400" />
           </li>
           <li>
-            <a
-              href="https://www.scalinghigh.com/tools"
-              className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Tools
-            </a>
-          </li>
-          <li>
-            <ChevronRight className="h-4 w-4 text-slate-400" />
-          </li>
-          <li>
             <span className="font-medium text-slate-900 dark:text-white">Speed Analyzer</span>
           </li>
         </ol>
